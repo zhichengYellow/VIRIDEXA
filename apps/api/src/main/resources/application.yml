@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: viridexa-api
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3308/nonfood_oil_plants?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai}
+    username: ${DB_USERNAME:viridexa_ro}
+    password: ${DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      read-only: true
+      maximum-pool-size: 6
+      pool-name: viridexa-readonly-pool
+  flyway:
+    enabled: ${FLYWAY_ENABLED:false}
+  mvc:
+    problemdetails:
+      enabled: true
+  jackson:
+    default-property-inclusion: non_null
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+    default-statement-timeout: 5
+
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-message: never
+
+viridexa:
+  cors:
+    allowed-origin: ${WEB_ORIGIN:http://localhost:5173}
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /docs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
