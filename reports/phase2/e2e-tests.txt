@@ -1,0 +1,1 @@
+PASS: real WFO, NHM and literature JSON -> candidate database -> unpublished isolation; see e2e-examples.json

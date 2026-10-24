@@ -1,0 +1,20 @@
+test_content_fingerprint (test_scientific.ScientificTests.test_content_fingerprint) ... ok
+test_csv_locator_order (test_scientific.ScientificTests.test_csv_locator_order) ... ok
+test_distinct_bases (test_scientific.ScientificTests.test_distinct_bases) ... ok
+test_incompatible_unit (test_scientific.ScientificTests.test_incompatible_unit) ... ok
+test_invalid_number (test_scientific.ScientificTests.test_invalid_number) ... ok
+test_missing_name (test_scientific.ScientificTests.test_missing_name) ... ok
+test_missing_value_stays_null (test_scientific.ScientificTests.test_missing_value_stays_null) ... ok
+test_no_forced_identity (test_scientific.ScientificTests.test_no_forced_identity) ... ok
+test_no_invented_chinese (test_scientific.ScientificTests.test_no_invented_chinese) ... ok
+test_source_hash_mismatch_and_missing (test_scientific.ScientificTests.test_source_hash_mismatch_and_missing) ... ok
+test_synonym_reference_preserved (test_scientific.ScientificTests.test_synonym_reference_preserved) ... ok
+test_trait_raw_not_mutated (test_scientific.ScientificTests.test_trait_raw_not_mutated) ... ok
+test_unknown_basis (test_scientific.ScientificTests.test_unknown_basis) ... ok
+test_unknown_trait_held (test_scientific.ScientificTests.test_unknown_trait_held) ... ok
+test_zero_is_zero (test_scientific.ScientificTests.test_zero_is_zero) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.013s
+
+OK

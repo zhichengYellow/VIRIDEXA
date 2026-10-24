@@ -1,0 +1,31 @@
+{
+  "USDA_food_nutrient_member": {
+    "scanned": 170469,
+    "EXCLUDED_NON_LIPID_NUTRIENT": 162036,
+    "selected_lipid_nutrient": 8400,
+    "MISSING_NUTRIENT_METADATA": 33
+  },
+  "literature_all_samples": {
+    "lauraceae-biodiesel-2014": 74,
+    "perilla-seed-oil-2010": 10,
+    "xiangxi-seed-oils-2018": 88
+  },
+  "literature_observations_note": "CSV subset and JSON extraction overlap; observation candidate counts are evidence records, not unique biological measurements.",
+  "WFO_members": {
+    "name.tsv": {
+      "distinct_records_scanned": 1663770,
+      "staged_records": 673,
+      "outside_staged_slice": 1663097
+    },
+    "taxon.tsv": {
+      "distinct_records_scanned": 454688,
+      "staged_records": 85,
+      "outside_staged_slice": 454603
+    },
+    "synonym.tsv": {
+      "distinct_records_scanned": 1026322,
+      "staged_records": 578,
+      "outside_staged_slice": 1025744
+    }
+  }
+}

@@ -1,57 +1,33 @@
-# Data protection report
+# Scientific data protection report
 
-**Inventory date:** 2026-10-24 (Asia/Shanghai)
-**Scope inspected:** `/Users/binyellow/VIRIDEXA/data`, `/Users/binyellow/VIRIDEXA/database`, the referenced course PDF in Downloads, and the currently running legacy MySQL container.
-**Actions:** filesystem reads and SHA-256 hashing; MySQL `SELECT` queries in read-only transactions; one consistent `mysqldump` export; one byte-for-byte PDF copy into the protected project data tree. No legacy database DDL/DML was issued.
+**Safety gate:** 2026-10-24, before moving protected files out of the Git worktree.
+**Result:** PASS. The source byte trees were moved intact after the gate; no source file was deleted or rewritten.
 
-## Protected filesystem assets
+## Protected location and boundary
 
-`LEGACY_ASSET_MANIFEST.md` inventories each file under `data/` and `database/`, including ZIP, PDF, CSV, JSON/JSONL, XLSX, SQL dumps, extracted evidence, screenshots, crops, image mappings, and incidental `.DS_Store` metadata. The manifest records absolute inventory path, size, and SHA-256. `scripts/build_asset_manifest.py` recomputes it without changing source bytes.
+The project reads source material from `../VIRIDEXA-protected/data` by default, configurable with `VIRIDEXA_DATA_DIR`. The former `database/` tree is retained at `../VIRIDEXA-protected/database` as an archive. Both paths are outside the VIRIDEXA Git worktree.
 
-The course source PDF was found at `/Users/binyellow/Downloads/课程设计资料.pdf` (9,298,489 bytes). Its SHA-256 is `669e9adbfbdfb855d196e5389b2b8aee763a226fee0ce7f0a7e83bc5bab73685`, matching the hash already recorded in `data/pdf_extract/pdf_inventory_and_crop_manifest.json`. A copy was created at `data/raw/course/课程设计资料.pdf` only after the hash matched. The Downloads original remains in place; the manifest script verifies both copies still match.
+Before the move, the complete inventory was recomputed and every file size and SHA-256 matched the then-current asset manifest. The check included original archives, source documents, extracted JSON/CSV, database backups, image files, PDF page renders, crop mappings, and evidence screenshots. It verified:
 
-The inspected workspace had 291 files and 212,935,530 bytes before the protected PDF copy. The manifest after that copy records **292 files** and **222,234,019 bytes**. The existing `data/raw/` includes the WFO archive, NHM combined traits, Flora of China source data, Global Spectrum workbook, three fatty-acid papers, and USDA FoodData Central archive. `data/` also contains 224 JPGs and 7 PNGs across source scans, mapped plant-image crops, diagnostic/contact sheets, and extracted PDF evidence.
+- 3 archived SQL gzip backups pass decompression checks.
+- The current 2026-10-24 consistent database snapshot has SHA-256 `367f37bb5c77399141786f0b47d153e70a232c3cce4d9c3073c4bad150ec6063` and passes gzip validation. A copy is preserved as `data/backups/viridexa-live-snapshot-20261024.sql.gz` outside Git.
+- The snapshot had already been restored successfully to an isolated MySQL instance; a real plant record was read through the API from that restored copy.
+- The protected course PDF and the Downloads original have matching SHA-256 `669e9adbfbdfb855d196e5389b2b8aee763a226fee0ce7f0a7e83bc5bab73685`.
+- 231 image files, 140 files under extracted PDF evidence, and all 45 crop references in the image manifest resolve to files.
+- The source snapshot and protected input directories are not Docker volumes. The normal application profile mounts no research input. The opt-in snapshot-ingestion profile mounts only the verified SQL snapshot as read-only into a temporary source container; the target's only named volume contains the rebuildable VIRIDEXA development database.
 
-`.gitignore` excludes `data/` source and derived research files by default while keeping `data/migration/` available for migration code. No Git remote was configured and nothing was pushed.
+`git clean -ndx -- data database` was used as a dry run only and showed that an ignored in-worktree data directory would be removed. No destructive clean was run. After the safety gate passed, both trees were moved to the external protected location. The regenerated `ASSET_MANIFEST.md` now records 292 protected files totaling 222,484,424 bytes, including the preserved copy of the verified current snapshot. A later `git clean` or Docker volume removal cannot reach those sibling directories.
 
-## Legacy database read-only statistics
+## Source database observations
 
-The legacy service was `nonfood-oilplants-pdf-mysql-20261009`, MySQL **8.0.44**, bound only to `127.0.0.1:3307` and attached to Docker volume `nonfood-oilplants-pdf-mysql-data-20261009`. The database account was not printed. All statistics queries ran in `START TRANSACTION READ ONLY` and ended in `ROLLBACK`; no old table or volume was altered.
+The source MySQL service was queried in read-only transactions. It had 36 tables: 150 plant records (117 marked `VERIFIED`, 33 `NEEDS_REVIEW`), 116 oil samples, 88 verified oil measurements, 27 review-pending oil measurements, 1 missing/unreadable oil value, 295 review-pending fatty-acid candidates, 1,180 trait values, 1,003 review-pending knowledge entries, 2,791 review events, 6 audit logs, 3 external candidates, and no users.
 
-| Measure | Observed count/status |
-|---|---:|
-| Tables | 36 |
-| `plants` | 150: 117 `VERIFIED`, 33 `NEEDS_REVIEW` |
-| Scientific-name status | 30 `VERIFIED_FROM_PRINTED_HEADING`, 120 `NEEDS_REVIEW` |
-| `plant_oil_samples` | 116: 89 OCR candidates, 27 manual samples |
-| Oil measurements | 88 `VERIFIED`, 27 `NEEDS_REVIEW`, 1 `MISSING_OR_UNREADABLE` |
-| `fatty_acid_candidates` | 295, all `REVIEW_PENDING` |
-| `plant_trait_values` | 1,180: 1,174 `EXTRACTED`, 6 `REVIEW_PENDING` |
-| `plant_knowledge_entries` | 1,003, all `NEEDS_REVIEW` |
-| `knowledge_review_events` | 2,791, covering 2026-10-10 to 2026-10-11 |
-| `audit_logs` | 6; actors remain nullable |
-| `external_import_candidates` | 3 |
-| `users` | 0 |
+The snapshot restore exposed a quality issue in the 117 public plant rows: all have scientific-name state `NEEDS_REVIEW`, their Chinese-name field duplicates the scientific name, and row-level source citations are absent. Those states are preserved as observations, not treated as accepted identity or fabricated citation.
 
-These are live database query results from 2026-10-24, not the older `data/data_quality_report.json` snapshot. Counts in older CSV/JSON manifests are not substituted for database results.
+The historical event records include nullable actors. VIRIDEXA's review model keeps both a nullable new-user reference and the historical actor reference; it does not create a reviewer identity for a NULL actor.
 
-## Backup and recoverability checks
+## Clean-slate handling
 
-All three existing SQL gzip backups passed `gzip -t`; each has a SHA-256 in `LEGACY_ASSET_MANIFEST.md`:
+The old application source was not present in the project workspace. No JSP, Servlet, DAO, service, page, stylesheet, or API implementation was copied. The old schema and SQL files are archived outside the repository and are not mounted by the VIRIDEXA application. The new API connects only to the separately migrated `viridexa` schema. Historical snapshots remain available to an explicit data-ingestion adapter; they are not a runtime compatibility database.
 
-- `data/backups/nonfood_oil_plants_pre_fatty_literature_20261011.sql.gz`
-- `data/backups/nonfood_oil_plants_post_fatty_literature_20261011.sql.gz`
-- `data/backups/nonfood_oil_plants_post_fatty_literature_source_links_20261011.sql.gz`
-
-The latest existing backup is dated 2026-10-11, so it is not the source used by the phase-one application. A separate current snapshot was exported read-only from the live database with `mysqldump --single-transaction --skip-lock-tables --quick --no-tablespaces`; all 36 source tables were InnoDB. The snapshot is `/tmp/viridexa-phase1-live-snapshot.sql.gz`, size **256,553 bytes**, SHA-256 `367f37bb5c77399141786f0b47d153e70a232c3cce4d9c3073c4bad150ec6063`, and it passes `gzip -t`.
-
-The first persistent-volume startup hit Docker VM `ENOSPC` while MySQL wrote its new data directory. The old database and volume remained unaffected. The measured Docker VM has 8 GiB memory; a later filesystem check showed 3.2 GiB available in its 15 GiB root filesystem. Phase-one Compose reuses the locally available MySQL image and restores the snapshot in a dedicated container with a 1 GiB tmpfs; recreating that container re-imports the snapshot. The phase-one API user receives `SELECT` on the restored schema only; Flyway is disabled on this snapshot connection. This temporary restore is not a permanent deployment database.
-
-The restored isolated copy contains 150 `plants` rows and 117 public rows marked `VERIFIED`, matching the source read-only counts. `viridexa_ro` was confirmed to have only `SELECT` on `nonfood_oil_plants.*`. A data-quality issue surfaced in the 117 public rows: all 117 have `scientific_name_status = NEEDS_REVIEW`, `name_zh` exactly duplicates `scientific_name`, and none has `source_document` or `source_pdf_sha256`. The phase-one UI therefore labels the Chinese name and citation as pending and keeps the taxonomic identity status visible. It does not claim a reviewed scientific identity or invent a citation.
-
-## Unresolved boundaries
-
-- The old JSP/Servlet application source was not in the VIRIDEXA workspace; the workspace initially contained only `data/` and `database/`. Targeted path searches did not find a separate PlantScope source directory. No old code was copied into the new app.
-- Copyright-sensitive raw research files and extracted images remain outside Git. The project-local PDF copy is also ignored by Git.
-- No historical review event with a `NULL` actor will be assigned a fabricated reviewer. The new model preserves actor nullability and source status.
-- Candidate values, missing/unreadable values, and unlinked sources remain separate from verified evidence. A missing value is never converted to zero.
+Original files remain immutable inputs. `ASSET_MANIFEST.md` can be regenerated with `scripts/build_asset_manifest.py`. Derived import reports and SQL are written under the external data directory's `processed/` folder and are excluded from the source inventory.

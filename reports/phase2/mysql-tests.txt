@@ -1,0 +1,1 @@
+PASS: V1-V7 MySQL migrations and 15 checks: pending isolation, reviewer FK, approval/revocation, readonly API, batch rollback, version retention, unknown-license isolation, importer review/write restrictions, batched replay, JSON structure and long reason preservation.

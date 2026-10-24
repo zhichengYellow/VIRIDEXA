@@ -2,43 +2,56 @@
 
 **Decode Nature. Connect Knowledge.**
 
-VIRIDEXA is a new Java and Vue application for plant knowledge exploration and scientific research. The existing `data/` and `database/` trees are protected source material. They are not copied into the application source tree and are ignored by Git by default.
+VIRIDEXA is an independent plant knowledge and scientific research platform. It does not run, copy, or depend on the earlier PlantScope application or schema. Its database, APIs, review workflow, Vue interface, and import pipeline are designed for VIRIDEXA.
 
-## Phase-one local run
+## Protected research inputs
 
-This workspace is currently on macOS. Java 21, Node 22, npm, and Docker are available. Run the following from this directory:
+Raw and extracted research materials live outside this Git worktree. The default location is `../VIRIDEXA-protected/data`; set `VIRIDEXA_DATA_DIR` in the local `.env` to use another protected directory. The archived SQL files are in the adjacent `../VIRIDEXA-protected/database/` directory and are inputs to explicit ingestion work only. Neither Git clean nor Docker volume operations can reach these sibling directories. The normal app stack never mounts the research tree; the opt-in snapshot importer mounts only the checksum-verified SQL file read-only.
+
+The generated [protected asset manifest](docs/ASSET_MANIFEST.md) records logical paths, sizes, and SHA-256 values. Regenerate it with:
+
+```sh
+python3 scripts/build_asset_manifest.py
+```
+
+## Local run
+
+Requirements: Docker Compose, Java 21, Node 22.12 or later, and Python 3.
 
 ```sh
 ./scripts/dev-env.sh
-./scripts/export-legacy-readonly-snapshot.sh
-nvm use
-(cd apps/web && npm ci && npm run build)
+(cd apps/web && nvm use && npm ci && npm run build)
 (cd apps/api && ./mvnw -s ../../.mvn/settings.xml package)
-docker compose up --build
+docker compose up -d --build
+python3 scripts/pipeline/import_course_extracts.py --dry-run
+python3 scripts/pipeline/import_course_extracts.py --apply
+python3 scripts/pipeline/import_snapshot_records.py --dry-run
+python3 scripts/pipeline/import_snapshot_records.py --apply
+./scripts/check-app.sh
 ```
 
-The export reads the existing MySQL container in a consistent, read-only transaction and writes a new snapshot to `/tmp`; it does not overwrite existing snapshots. Compose restores that snapshot to its own MySQL 8.0.44 container in a 1 GiB tmpfs, creates a `SELECT`-only application account, then serves the API and built Vue app on loopback ports 18080 and 5173 through Nginx. Build the Vue assets on the host with `cd apps/web && npm run build`, then build the API jar with `cd apps/api && ./mvnw -s ../../.mvn/settings.xml package`; Compose uses the locally cached Java 21, MySQL 8.0, and Nginx images. The database snapshot is temporary: recreating the MySQL container imports the same checksum-verified snapshot again. The initial image pull/data-directory attempt returned `no space left on device`; current container storage is kept bounded with the tmpfs restore and existing local images. No production data volume is configured in this phase. For hot reload, run the Vite server on the host with Node 22.20 from `.nvmrc`.
+Open <http://localhost:5173>. The target MySQL schema is a new `viridexa` database with Flyway migrations. The API uses a `SELECT`-only account; the pipeline writes through a separate insert-only account after explicit `--apply`. Inspect each dry-run report under the external `processed/` directory before applying it. Snapshot ingestion temporarily restores the protected snapshot to an isolated MySQL tmpfs service; the API never connects to that source.
 
-Open <http://localhost:5173>. The search endpoint only returns public records whose `verification_status` is `VERIFIED`. The API source connection is read-only and Flyway is disabled for the restored legacy snapshot. V2 migrations will be applied to a separate target database after their dry run and recovery checks.
+The Vue production assets are served by Nginx. Host-side hot reload is available from `apps/web` with Node 22.20. API OpenAPI is available at <http://localhost:18080/docs>.
 
-Run the initial checks with:
+## Checks
 
 ```sh
-cd apps/api && ./mvnw -s ../../.mvn/settings.xml test
-cd ../web && nvm use && npm ci && npm run build
-cd ../..
-./scripts/check-phase1.sh
+(cd apps/api && ./mvnw -s ../../.mvn/settings.xml test)
+(cd apps/web && nvm use && npm ci && npm run build)
+python3 scripts/pipeline/import_course_extracts.py --dry-run
+python3 scripts/pipeline/import_snapshot_records.py --dry-run
+./scripts/check-app.sh
 ```
 
-To stop the local stack, use `docker compose down`. The phase-one MySQL data is temporary and will be restored from the snapshot when the container is recreated. It is separate from the old database container and volume.
+`docker compose down` stops the application but keeps its rebuildable development database volume. `docker compose down -v` removes only the VIRIDEXA target database volume; scientific inputs remain outside the repository and outside Docker volumes.
 
-## Phase-one artifacts
+## Design and data lineage
 
-- `docs/LEGACY_ASSET_MANIFEST.md` — per-file sizes, SHA-256 hashes, and source paths.
-- `docs/DATA_PROTECTION_REPORT.md` — legacy database counts, backup checks, and boundaries.
-- `docs/VIRIDEXA_ARCHITECTURE.md` — phase-one architecture and verified dependency versions.
-- `docs/DATABASE_V2_DESIGN.md` — proposed normalized target model.
-- `docs/MIGRATION_MAPPING.md` — source-to-target mapping and dry-run rules.
-- `docs/PHASE1_ACCEPTANCE.md` — execution evidence and remaining gates.
+- [VIRIDEXA architecture](docs/VIRIDEXA_ARCHITECTURE.md)
+- [VIRIDEXA database design](docs/DATABASE_VIRIDEXA_DESIGN.md)
+- [Scientific-data import pipeline](docs/IMPORT_PIPELINE.md)
+- [Data protection report](docs/DATA_PROTECTION_REPORT.md)
+- [Clean-slate checkpoint](docs/CLEAN_SLATE_CHECKPOINT.md)
 
-Application source and documentation are versioned in the configured GitHub repository. Raw scientific files, database contents, local credentials, and build outputs remain excluded from Git.
+The first importer slice uses real course-PDF extractions: 33 plants, 89 samples, 88 source-image-checked oil values, one explicitly missing value, and 748 unresolved numeric fragments. The snapshot adapter stages 6,554 real source rows, 2,791 historical review events, and 6 operational audit events. Plants remain in review-pending preview state; no old application IDs are reused, no reviewers are invented, and study profiles are not merged.

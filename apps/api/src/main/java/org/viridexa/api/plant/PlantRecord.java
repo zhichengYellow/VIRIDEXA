@@ -9,7 +9,7 @@ public record PlantRecord(
         String genusNameLatin,
         String morphology,
         String distribution,
-        String verificationStatus,
+        String recordStatus,
         String scientificNameStatus,
         String sourceDocument,
         String sourcePrintedPages,

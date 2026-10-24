@@ -1,29 +1,49 @@
 name: viridexa
 
 services:
-  db:
-    # Reuses the locally installed MySQL 8.0.44 image used by the legacy server.
-    image: mysql:8.0
-    container_name: viridexa-mysql-phase1
-    restart: unless-stopped
+  # Explicit, temporary source for data ingestion only. The application never connects to it.
+  snapshot-source:
+    profiles: ["ingestion-source"]
+    image: mysql:8.0.44
+    container_name: viridexa-snapshot-source
+    restart: "no"
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Run scripts/dev-env.sh first}
       MYSQL_DATABASE: nonfood_oil_plants
-      MYSQL_READONLY_PASSWORD: ${MYSQL_READONLY_PASSWORD:?Run scripts/dev-env.sh first}
     command: ["mysqld", "--innodb-buffer-pool-size=128M"]
-    ports:
-      - "127.0.0.1:3308:3306"
     tmpfs:
       - /var/lib/mysql:rw,size=1g,mode=1777
     volumes:
-      - ${LEGACY_SNAPSHOT_PATH:-/tmp/viridexa-phase1-live-snapshot.sql.gz}:/docker-entrypoint-initdb.d/90-legacy-snapshot.sql.gz:ro
-      - ./infra/mysql/init/99-readonly-user.sh:/docker-entrypoint-initdb.d/99-readonly-user.sh:ro
+      - ${VIRIDEXA_DATA_DIR:-../VIRIDEXA-protected/data}/backups/viridexa-live-snapshot-20261024.sql.gz:/docker-entrypoint-initdb.d/90-source-snapshot.sql.gz:ro
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD}"]
       interval: 5s
-      timeout: 5s
+      timeout: 4s
       retries: 30
-      start_period: 30s
+      start_period: 25s
+
+  db:
+    image: mysql:8.0.44
+    container_name: viridexa-db-v1
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Run scripts/dev-env.sh first}
+      MYSQL_DATABASE: viridexa
+      MYSQL_APP_PASSWORD: ${MYSQL_APP_PASSWORD:?Run scripts/dev-env.sh first}
+      MYSQL_MIGRATOR_PASSWORD: ${MYSQL_MIGRATOR_PASSWORD:?Run scripts/dev-env.sh first}
+      MYSQL_IMPORTER_PASSWORD: ${MYSQL_IMPORTER_PASSWORD:?Run scripts/dev-env.sh first}
+    command: ["mysqld", "--innodb-buffer-pool-size=128M", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci"]
+    ports:
+      - "127.0.0.1:3309:3306"
+    volumes:
+      - viridexa_mysql_v1:/var/lib/mysql
+      - ./infra/mysql/init/01-v1-users.sh:/docker-entrypoint-initdb.d/01-v1-users.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 4s
+      retries: 30
+      start_period: 25s
 
   api:
     build:
@@ -34,11 +54,13 @@ services:
       db:
         condition: service_healthy
     environment:
-      DB_URL: jdbc:mysql://db:3306/nonfood_oil_plants?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+      DB_URL: jdbc:mysql://db:3306/viridexa?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
       DB_USERNAME: viridexa_ro
-      DB_PASSWORD: ${MYSQL_READONLY_PASSWORD:?Run scripts/dev-env.sh first}
+      DB_PASSWORD: ${MYSQL_APP_PASSWORD:?Run scripts/dev-env.sh first}
+      DB_MIGRATION_USERNAME: viridexa_migrator
+      DB_MIGRATION_PASSWORD: ${MYSQL_MIGRATOR_PASSWORD:?Run scripts/dev-env.sh first}
+      FLYWAY_ENABLED: "true"
       WEB_ORIGIN: http://localhost:5173
-      FLYWAY_ENABLED: "false"
       SERVER_PORT: 8080
     ports:
       - "127.0.0.1:18080:8080"
@@ -60,3 +82,8 @@ services:
       - ./infra/nginx/web.conf:/etc/nginx/conf.d/default.conf:ro
     ports:
       - "127.0.0.1:5173:80"
+
+volumes:
+  # Only the rebuildable VIRIDEXA target database lives in Docker volume storage.
+  # Protected scientific files are outside this repository and are never a Docker volume.
+  viridexa_mysql_v1:

@@ -7,7 +7,7 @@ export interface PlantRecord {
   genusNameLatin: string | null
   morphology: string | null
   distribution: string | null
-  verificationStatus: string
+  recordStatus: string
   scientificNameStatus: string
   sourceDocument: string | null
   sourcePrintedPages: string | null

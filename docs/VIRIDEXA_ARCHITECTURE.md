@@ -1,70 +1,70 @@
-# VIRIDEXA architecture — phase 0/1
+# VIRIDEXA architecture
 
-## Application boundary
+VIRIDEXA is implemented from its own product requirements. The PlantScope application, pages, APIs, schema, and CSS are not runtime dependencies or code templates. Scientific files and the database snapshot are treated as immutable inputs to a separate import pipeline.
 
-VIRIDEXA is a fresh application in this workspace. The existing `data/` and `database/` trees are protected inputs. The old app source was not present here, so there was nothing to port or clear. The current phase reads a consistent snapshot of the live legacy database through a `SELECT`-only account. The old MySQL service and volume are left in place.
+## Runtime and ingestion boundaries
 
 ```mermaid
 flowchart LR
-  Browser[Browser] --> Web[Vue 3 + TypeScript<br/>Vite locally / Nginx in Compose]
-  Web -->|same-origin /api proxy| API[Spring Boot 4.1 MVC]
-  API -->|MyBatis parameterized SELECT| RO[viridexa_ro account]
-  RO --> Snapshot[(Isolated MySQL 8.0.44 snapshot)]
-  Legacy[(Legacy MySQL 8.0.44)] -->|consistent read-only export| Snapshot
-  Raw[(Protected data/raw + evidence)] -. checksum and source references .-> Mapping[Migration dry-run plan]
+  Browser[Vue 3 + TypeScript] -->|same-origin REST| API[Spring Boot 4.1 MVC]
+  API -->|MyBatis parameterized SELECT| RO[viridexa_ro]
+  RO --> DB[(MySQL 8.0<br/>VIRIDEXA schema)]
+  Flyway[Flyway migrations] -->|viridexa_migrator| DB
+  Inputs[(External protected data directory)] -->|read-only, checksummed| Pipeline[Deterministic import pipeline]
+  Snapshot[(Verified database snapshot)] -->|temporary read-only restore| SnapshotDB[(MySQL tmpfs source)]
+  SnapshotDB -->|SELECT; source-row ledger| Pipeline
+  Pipeline -->|dry-run report then explicit apply| DB
+  DB --> Agent[Future evidence-constrained Agent]
 ```
 
-The isolated snapshot uses a dedicated MySQL container on loopback port 3308 with a 1 GiB tmpfs for its data directory. The initial image pull and persistent-directory initialization returned `no space left on device`; Compose now reuses the local MySQL image and bounds restore storage with tmpfs. The measured Docker VM has 8 GiB memory. The isolated data is temporary and re-imported from the same checksum-verified snapshot when the container is recreated. This is not the future v2 target database. Flyway is present in the application dependency set but disabled for this read-only snapshot. A separate v2 schema will be created and migrated only after the dry-run mapping and recovery process are accepted.
+The protected inputs live outside the Git worktree at `../VIRIDEXA-protected/data` by default. Override that location with `VIRIDEXA_DATA_DIR`. The adjacent `database/` directory is an archive of the previous schema and SQL files, not the VIRIDEXA schema. The normal application profile mounts no research data; the opt-in snapshot-ingestion profile mounts one checksum-verified SQL file read-only into a temporary source container. Deleting the target's named development volume only deletes the rebuildable VIRIDEXA database.
 
-For a local hot-reload session, Vite runs on the host at port 5173 and proxies `/api` to the Spring API at port 18080. Compose serves the built `apps/web/dist` through the locally cached Nginx image on port 5173 and proxies `/api` to the API container. The API container uses the locally cached Java 21 image; its jar is built with the Maven Wrapper before `docker compose up`.
+The v1 database is created by Flyway on the new MySQL service. The API uses a `SELECT`-only database user. A separate migrator user applies schema migrations, and a separate insert-only importer user writes the output of explicit pipeline runs. No API connection points to a historical schema or snapshot.
 
-## Current request flow
+## Implemented vertical slice
 
-- `apps/web/`: Vue 3, TypeScript, Vite, Vue Router, Pinia, Tailwind CSS; search renders database records returned by the API.
+- `apps/web/`: Vue 3, TypeScript, Vite, Vue Router, Pinia, Tailwind CSS; the plant research page calls the new REST API.
 - `apps/api/`: Spring MVC, Spring Security, Bean Validation, Actuator, Springdoc OpenAPI, MyBatis, Flyway, MySQL Connector/J.
-- `GET /api/v1/plants`: parameterized search over Chinese name, scientific name, and verified aliases. The query is restricted to public records with `verification_status = 'VERIFIED'`.
-- `GET /api/v1/plants/{id}`: returns one verified, public plant or a 404 Problem Detail.
-- No write endpoint exists. Anonymous GET is limited to plant reads, health, and API documentation; other requests are denied. CSRF remains enabled. Sessions, form login, and HTTP Basic are disabled. CORS permits only the configured local web origin and GET/OPTIONS.
-- The app database pool is read-only. In the compose environment the database account has only `SELECT` grants for the restored legacy schema.
-- ECharts and Cytoscape.js are installed for the later research visualization stages; no chart or graph is presented as implemented in phase one. Spring AI is deferred until the controlled research-agent stage.
+- `GET /api/v1/plants`: searches VIRIDEXA `plant`, `plant_name`, and `taxon` records in `PUBLIC` or clearly marked `RESEARCH_PREVIEW` state.
+- `GET /api/v1/plants/{id}`: returns one VIRIDEXA plant record and its source/status fields.
+- `scripts/pipeline/import_course_extracts.py`: verifies the protected course PDF hash, indexes input assets, and stages the extracted course-plant and oil-sample slice. Dry-run is the default. Explicit `--apply` writes only to the local VIRIDEXA Compose database.
+- `scripts/pipeline/import_snapshot_records.py`: restores the archived snapshot into a temporary isolated MySQL instance, reads selected scientific/review tables, and stores raw source rows plus review/audit events in VIRIDEXA provenance tables. It does not connect to the former live service.
+- Source names and field-level evidence states remain separate from overall plant review state. Extracted records are not silently promoted to approved records.
 
-## Versions and compatibility evidence
+Anonymous requests are limited to read endpoints, health checks, and API documentation. Other methods are denied. CSRF remains enabled; form login and HTTP Basic are disabled. CORS permits the configured web origin and GET/OPTIONS. The API account cannot modify scientific data.
 
-Versions were checked on 2026-10-24 before the dependency files were written. The versions in lockfiles/POM are fixed; update them only with a fresh compatibility check.
+## Data model and scientific invariants
 
-| Component | Phase-one version | Compatibility evidence / local result |
-|---|---:|---|
-| Java | 21.0.7 | Installed locally; Spring Boot 4.1.2 supports Java 17–26. |
-| Spring Boot | 4.1.2 | Latest stable 4.1 patch checked at implementation time; 4.1.3 was a snapshot. |
-| Spring Framework | 7.0.10, Boot-managed | Boot 4.1 system requirements require Spring Framework 7.0.9 or later. |
-| Maven Wrapper | 3.10.0 | Generated by Spring Initializr; system Maven 3.6.1 is below Boot's 3.6.3 minimum. |
-| MyBatis Spring Boot Starter | 4.1.0 | MyBatis project identifies 4.1.x with MyBatis-Spring 4.1, MyBatis 3.5, Boot 4.1, Java 17+. |
-| MySQL | 8.0.44 | Matches the observed source server version; the new service uses a separate tmpfs database directory in phase one. |
-| Spring AI | 2.0.2 (deferred) | Spring AI 2.0.x documents support for Boot 4.0.x and 4.1.x; not loaded in phase one. |
-| Springdoc OpenAPI | 3.1.1 | Project compatibility guidance lists 3.1.x for Boot 4.1; API docs dependency resolves with the build. |
-| Node / npm | 22.20.0 / 11.6.2 | Available locally; Vite 8 and Vue plugin 6 both require Node `^20.19.0 || >=22.12.0`. |
-| Vue | 3.5.44 | Compatible with Vue Router 5.4.0 and Pinia 4.1.0 peer ranges. |
-| Vite / Vue plugin | 8.3.5 / 6.0.10 | Vue plugin peer range includes Vite 8; local production build passes. |
-| TypeScript / vue-tsc | 5.9.3 / 3.3.13 | Type check and production build pass. TypeScript 7.0.2 was rejected because current vue-tsc imports an unexported TypeScript path. |
-| Vue Router / Pinia | 5.4.0 / 4.1.0 | Router peer ranges include Vue 3.5 and Pinia 4. |
-| Tailwind CSS / Vite plugin | 4.3.3 / 4.3.3 | Plugin peer range includes Vite 8; local production build passes. |
-| ECharts / Cytoscape.js | 6.1.0 / 3.34.4 | Installed for later chart and graph views; no empty service is deployed. |
+The new schema is defined in `apps/api/src/main/resources/db/migration/V1__viridexa_core.sql`. It separates plant records, taxonomy, source assets, evidence locators, trait observations, studies, samples, measurements, import candidates, media, external identifiers, users/roles, favorites, and append-only review events.
 
-Spring Boot requires Java 17 or later, Spring Framework 7.0.9 or later, and Maven 3.6.3 or later. The locally installed Maven was 3.6.1, so the project uses its wrapper. The initial Maven Central endpoint returned intermittent HTTP 403 responses; dependency verification was retried through Google's read-only mirror of Maven Central. No mirror or credentials are embedded in the project.
+- New table identities are generated by VIRIDEXA. Historical numeric IDs are not required or reused.
+- A sample may remain unlinked from a plant or taxon while preserving its source record and evidence.
+- A measurement belongs to one sample and has one unit, analytical basis, status, and evidence locator. Study values are never merged into a synthetic sample.
+- Missing and unreadable values use NULL plus an explicit state; they do not become zero.
+- Historical review actor references may be null. New publication requires a named reviewer.
+- The knowledge graph is a projection of persisted relationships; model output cannot create graph edges.
+- Search and ordinary plant reads never depend on model availability.
 
-## Later stages
+## Versions and local compatibility evidence
 
-- V2 schema migrations use Flyway against a dedicated target database with a write-capable migration identity, never the source snapshot.
-- Login and RBAC will be introduced with named users only after user/account migration semantics are mapped. Anonymous reads do not imply permission to review or publish.
-- Spring AI will call a remote model behind an optional integration boundary. Search and the verified-data APIs will not depend on model availability.
-- Nginx, Ubuntu Compose deployment, resource sizing, and GitHub Actions deployment are later-stage work. No local GPU or large model is assumed.
+Dependency versions remain pinned in `pom.xml` and `package-lock.json`. The baseline compatibility check on 2026-10-24 confirmed Java 21 with Spring Boot 4.1.2, MyBatis Starter 4.1.0, and MySQL 8.0.44; Vue 3.5.44, Vite 8.3.5, TypeScript 5.9.3, Router 5.4.0, Pinia 4.1.0, Tailwind 4.3.3, ECharts 6.1.0, and Cytoscape 3.34.4. Spring AI 2.0.2 was reviewed for Boot 4.1 compatibility but remains deferred until the evidence-constrained agent stage. The new Compose target is pinned to MySQL 8.0.44.
 
-## Official compatibility references
+The API requires Java 21 and is built with the Maven Wrapper. The Vue build requires Node 22.12 or later; `.nvmrc` pins the validated Node 22.20.0 local toolchain.
 
-- [Spring Boot 4.1 system requirements](https://docs.spring.io/spring-boot/system-requirements.html)
+## Next architecture increments
+
+1. Extend the independent pipeline to normalize snapshot source rows, then extract WFO, NHM, Flora of China, Global Spectrum, GBIF, literature, and USDA data.
+2. Add evidence-backed trait and oil/fatty-acid query endpoints, sample comparisons with units/basis, and public evidence coverage.
+3. Add authentication, named reviewer RBAC, and append-only review actions.
+4. Add graph projections and a remote Spring AI agent with read-only tools over approved records.
+5. Complete browser E2E, resource sizing, and Ubuntu deployment after the application flows stabilize.
+
+## Compatibility references checked for the pinned baseline
+
+- [Spring Boot system requirements](https://docs.spring.io/spring-boot/system-requirements.html)
 - [Spring Boot releases](https://github.com/spring-projects/spring-boot/releases)
 - [MyBatis Spring Boot Starter requirements](https://github.com/mybatis/spring-boot-starter)
 - [Spring AI getting started and Boot compatibility](https://docs.spring.io/spring-ai/reference/getting-started.html)
 - [Springdoc compatibility FAQ](https://springdoc.org/index.html#faq)
 - [Vue releases](https://vuejs.org/about/releases)
-- [Vite guide / Node requirement](https://vite.dev/guide/)
+- [Vite guide and Node requirement](https://vite.dev/guide/)

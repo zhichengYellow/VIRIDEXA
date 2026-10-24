@@ -1,0 +1,14 @@
+test_course_and_mapping_ledgers_in_isolated_fixture (test_source_botany.LocalLedgerTests.test_course_and_mapping_ledgers_in_isolated_fixture) ... ok
+test_course_and_mapping_ledgers_are_preserved (test_source_botany.SourceBotanyTests.test_course_and_mapping_ledgers_are_preserved) ... ok
+test_real_gbif_taxonomy_records_are_located_and_unapproved (test_source_botany.SourceBotanyTests.test_real_gbif_taxonomy_records_are_located_and_unapproved) ... ok
+test_real_trait_archives_yield_morphology (test_source_botany.SourceBotanyTests.test_real_trait_archives_yield_morphology) ... ok
+test_real_wfo_slice_reports_scan_counts_and_candidates_for_review (test_source_botany.SourceBotanyTests.test_real_wfo_slice_reports_scan_counts_and_candidates_for_review) ... ok
+test_taxonomy_missing_name_is_held (test_source_botany.SourceBotanyTests.test_taxonomy_missing_name_is_held) ... ok
+test_missing_values_and_unknown_basis (test_source_lipid.LipidSourceTests.test_missing_values_and_unknown_basis) ... ok
+test_percentage_bounds_hold (test_source_lipid.LipidSourceTests.test_percentage_bounds_hold) ... ok
+test_real_sources_emit_distinct_kinds_and_provenance (test_source_lipid.LipidSourceTests.test_real_sources_emit_distinct_kinds_and_provenance) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 94.084s
+
+OK

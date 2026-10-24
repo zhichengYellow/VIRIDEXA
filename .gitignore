@@ -1,10 +1,9 @@
-# Scientific source files and derived datasets stay local.
-data/*
-!data/migration/
-!data/migration/**
+# Protected science assets and database archives are kept outside this Git worktree.
+data/
 database/
 
-# Local secrets and build products.
+# Rebuildable pipeline outputs and local environment.
+.venv/
 .env
 .env.*
 !.env.example
@@ -14,3 +13,7 @@ database/
 **/.vite/
 *.log
 .DS_Store
+
+# Rebuildable scientific staging spools (reports remain tracked)
+reports/phase2/**/candidates.jsonl
+__pycache__/

@@ -1,0 +1,58 @@
+{
+  "mode": "dry-run",
+  "manifest_verified": 292,
+  "counts": {
+    "TAXONOMY": 1339,
+    "normalized": 93044,
+    "MORPHOLOGY": 82991,
+    "LIPID": 8714
+  },
+  "reasons": {
+    "course oil value is missing": 1
+  },
+  "adapter_stats": {
+    "wfo": {
+      "name.tsv": {
+        "scanned": 1663770,
+        "passes": 2,
+        "distinct_records_scanned": 1663770,
+        "matched": 408,
+        "excluded": 1663362
+      },
+      "taxon.tsv": {
+        "scanned": 4546880,
+        "passes": 10,
+        "distinct_records_scanned": 454688,
+        "matched": 85,
+        "excluded": 0
+      },
+      "synonym.tsv": {
+        "scanned": 1026322,
+        "passes": 1,
+        "distinct_records_scanned": 1026322,
+        "matched": 578,
+        "excluded": 1025744
+      }
+    }
+  },
+  "source_counts": {
+    "data/raw/wfo/wfo_plantlist_2026-06.zip": 1336,
+    "data/external/gbif/match_candidates_20261011.jsonl": 3,
+    "data/raw/nhm_traits/combined.zip": 59369,
+    "data/raw/nhm_traits/efloras.flora_of_china.zip": 23622,
+    "data/oil_samples.json": 89,
+    "data/fatty_acid_literature_samples.csv": 27,
+    "data/fatty_acid_literature_candidates.csv": 198,
+    "data/raw/fatty_acids/usda/FoodData_Central_foundation_food_csv_2026-04-30.zip": 8400
+  },
+  "source_versions": 12,
+  "license_unknown_sources": 12,
+  "confirmed_new": 0,
+  "committed_batches": 0,
+  "spool_sha256": "8f16017d70d23807da24cff5dbfb71d7a4d0edb3165d36883d8ced159c87aaf8",
+  "before": null,
+  "after": null,
+  "identical_database_replay": null,
+  "publication": "No decisions or licenses granted by importer",
+  "generated_at": "2026-10-24T05:31:35.878189+00:00"
+}

@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/Users/binyellow/VIRIDEXA/scripts/pipeline/run_science.py", line 158, in <module>
+    if __name__=='__main__': main()
+                             ~~~~^^
+  File "/Users/binyellow/VIRIDEXA/scripts/pipeline/run_science.py", line 138, in main
+    if a.apply: mysql('START TRANSACTION;\n'+bulk_sql(batch)+'COMMIT;'); committed+=1
+                ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/binyellow/VIRIDEXA/scripts/pipeline/run_science.py", line 26, in mysql
+    raise RuntimeError(result.stderr[:1500])
+RuntimeError: ERROR 1406 (22001) at line 2: Data too long for column 'reason' at row 1
+

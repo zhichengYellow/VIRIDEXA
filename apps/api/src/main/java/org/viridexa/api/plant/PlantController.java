@@ -31,6 +31,6 @@ public class PlantController {
 
     @GetMapping("/{id}")
     public PlantRecord findById(@PathVariable @Positive long id) {
-        return service.getVerified(id);
+        return service.getById(id);
     }
 }

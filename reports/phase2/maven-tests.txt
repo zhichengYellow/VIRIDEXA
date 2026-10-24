@@ -1,0 +1,106 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------< org.viridexa:viridexa-api >----------------------
+[INFO] Building VIRIDEXA API 0.1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] Loaded 24218 auto-discovered prefixes for remote repository maven-central (prefixes-maven-central.txt)
+[WARNING] Could not transfer metadata /.meta/prefixes.txt from/to flyway-community-db-support (https://maven.pkg.github.com/flyway/flyway-community-db-support): HTTP Status: 401
+[WARNING] Could not transfer metadata /.meta/prefixes.txt from/to MavenFeed (https://red-gate.pkgs.visualstudio.com/MavenFeed/_packaging/MavenFeed/maven/v1/): HTTP Status: 401
+[INFO] 
+[INFO] --- resources:3.5.0:resources (default-resources) @ viridexa-api ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 3 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.15.0:compile (default-compile) @ viridexa-api ---
+[INFO] Loaded 74 auto-discovered prefixes for remote repository apache.snapshots (prefixes-apache.snapshots.txt)
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.5.0:testResources (default-testResources) @ viridexa-api ---
+[INFO] skip non existing resourceDirectory /Users/binyellow/VIRIDEXA/apps/api/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.15.0:testCompile (default-testCompile) @ viridexa-api ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 2 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.6:test (default-test) @ viridexa-api ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running org.viridexa.api.plant.PlantControllerSecurityTest
+12:16:10.988 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [org.viridexa.api.plant.PlantControllerSecurityTest]: PlantControllerSecurityTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+12:16:11.152 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration org.viridexa.api.ViridexaApiApplication for test class org.viridexa.api.plant.PlantControllerSecurityTest
+12:16:11.155 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [org.viridexa.api.plant.PlantControllerSecurityTest]: PlantControllerSecurityTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+12:16:11.167 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration org.viridexa.api.ViridexaApiApplication for test class org.viridexa.api.plant.PlantControllerSecurityTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.2)
+
+2026-10-24T12:16:11.583+08:00  INFO 69186 --- [viridexa-api] [           main] o.v.a.plant.PlantControllerSecurityTest  : Starting PlantControllerSecurityTest using Java 21.0.7 with PID 69186 (started by binyellow in /Users/binyellow/VIRIDEXA/apps/api)
+2026-10-24T12:16:11.585+08:00  INFO 69186 --- [viridexa-api] [           main] o.v.a.plant.PlantControllerSecurityTest  : No active profile set, falling back to 1 default profile: "default"
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+WARNING: A Java agent has been loaded dynamically (/Users/binyellow/.m2/repository/net/bytebuddy/byte-buddy-agent/1.18.15/byte-buddy-agent-1.18.15.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+2026-10-24T12:16:13.227+08:00  WARN 69186 --- [viridexa-api] [           main] .s.a.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: [REDACTED ephemeral test credential]
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-10-24T12:16:13.234+08:00  INFO 69186 --- [viridexa-api] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-10-24T12:16:13.599+08:00  INFO 69186 --- [viridexa-api] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-10-24T12:16:13.599+08:00  INFO 69186 --- [viridexa-api] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-10-24T12:16:13.601+08:00  INFO 69186 --- [viridexa-api] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 2 ms
+2026-10-24T12:16:13.655+08:00  INFO 69186 --- [viridexa-api] [           main] o.v.a.plant.PlantControllerSecurityTest  : Started PlantControllerSecurityTest in 2.422 seconds (process running for 3.562)
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.135 s -- in org.viridexa.api.plant.PlantControllerSecurityTest
+[INFO] Running org.viridexa.api.science.ScientificControllerTest
+2026-10-24T12:16:13.926+08:00  INFO 69186 --- [viridexa-api] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [org.viridexa.api.science.ScientificControllerTest]: ScientificControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-24T12:16:13.949+08:00  INFO 69186 --- [viridexa-api] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration org.viridexa.api.ViridexaApiApplication for test class org.viridexa.api.science.ScientificControllerTest
+2026-10-24T12:16:13.950+08:00  INFO 69186 --- [viridexa-api] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [org.viridexa.api.science.ScientificControllerTest]: ScientificControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-24T12:16:13.961+08:00  INFO 69186 --- [viridexa-api] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration org.viridexa.api.ViridexaApiApplication for test class org.viridexa.api.science.ScientificControllerTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.2)
+
+2026-10-24T12:16:14.008+08:00  INFO 69186 --- [viridexa-api] [           main] o.v.a.science.ScientificControllerTest   : Starting ScientificControllerTest using Java 21.0.7 with PID 69186 (started by binyellow in /Users/binyellow/VIRIDEXA/apps/api)
+2026-10-24T12:16:14.009+08:00  INFO 69186 --- [viridexa-api] [           main] o.v.a.science.ScientificControllerTest   : No active profile set, falling back to 1 default profile: "default"
+2026-10-24T12:16:14.241+08:00  WARN 69186 --- [viridexa-api] [           main] .s.a.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: [REDACTED ephemeral test credential]
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-10-24T12:16:14.242+08:00  INFO 69186 --- [viridexa-api] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-10-24T12:16:14.323+08:00  INFO 69186 --- [viridexa-api] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-10-24T12:16:14.323+08:00  INFO 69186 --- [viridexa-api] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-10-24T12:16:14.324+08:00  INFO 69186 --- [viridexa-api] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-10-24T12:16:14.339+08:00  INFO 69186 --- [viridexa-api] [           main] o.v.a.science.ScientificControllerTest   : Started ScientificControllerTest in 0.369 seconds (process running for 4.246)
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.488 s -- in org.viridexa.api.science.ScientificControllerTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  10.641 s
+[INFO] Finished at: 2026-10-24T12:16:14+08:00
+[INFO] ------------------------------------------------------------------------

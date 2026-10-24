@@ -1,0 +1,23 @@
+Traceback (most recent call last):
+  File "/Users/binyellow/VIRIDEXA/scripts/pipeline/run_science.py", line 145, in <module>
+  File "/Users/binyellow/VIRIDEXA/scripts/pipeline/run_science.py", line 125, in main
+    except Exception as e:
+    
+  File "/Users/binyellow/VIRIDEXA/scripts/pipeline/run_science.py", line 21, in mysql
+    password = 'MYSQL_IMPORTER_PASSWORD' if user == 'viridexa_importer' else 'MYSQL_ROOT_PASSWORD'
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    result = subprocess.run(['docker','exec','-i','viridexa-db-v1','sh','-c',
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        f'MYSQL_PWD="${password}" mysql -u{user} --default-character-set=utf8mb4 --batch --skip-column-names viridexa'],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/subprocess.py", line 556, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/subprocess.py", line 1222, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/lib/python3.13/subprocess.py", line 2128, in _communicate
+    ready = selector.select(timeout)
+  File "/opt/miniconda3/lib/python3.13/selectors.py", line 398, in select
+    fd_event_list = self._selector.poll(timeout)
+KeyboardInterrupt

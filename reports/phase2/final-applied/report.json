@@ -1,0 +1,77 @@
+{
+  "mode": "applied",
+  "manifest_verified": 292,
+  "counts": {
+    "TAXONOMY": 1545,
+    "normalized": 93077,
+    "held": 173,
+    "MORPHOLOGY": 82991,
+    "LIPID": 8714
+  },
+  "reasons": {
+    "mapping ledger preserved as source evidence; identity mapping requires review": 173,
+    "course oil value is missing": 1
+  },
+  "adapter_stats": {
+    "wfo": {
+      "name.tsv": {
+        "scanned": 1663770,
+        "passes": 2,
+        "distinct_records_scanned": 1663770,
+        "matched": 408,
+        "excluded": 1663362
+      },
+      "taxon.tsv": {
+        "scanned": 4546880,
+        "passes": 10,
+        "distinct_records_scanned": 454688,
+        "matched": 85,
+        "excluded": 454603
+      },
+      "synonym.tsv": {
+        "scanned": 1026322,
+        "passes": 1,
+        "distinct_records_scanned": 1026322,
+        "matched": 578,
+        "excluded": 1025744
+      }
+    }
+  },
+  "source_counts": {
+    "data/raw/wfo/wfo_plantlist_2026-06.zip": 1336,
+    "data/plants.json": 33,
+    "data/nhm_taxon_identity_review_20261011.csv": 56,
+    "data/nhm_taxon_import_manifest_20261011.csv": 117,
+    "data/external/gbif/match_candidates_20261011.jsonl": 3,
+    "data/raw/nhm_traits/combined.zip": 59369,
+    "data/raw/nhm_traits/efloras.flora_of_china.zip": 23622,
+    "data/oil_samples.json": 89,
+    "data/fatty_acid_literature_samples.csv": 27,
+    "data/fatty_acid_literature_candidates.csv": 198,
+    "data/raw/fatty_acids/usda/FoodData_Central_foundation_food_csv_2026-04-30.zip": 8400
+  },
+  "source_versions": 15,
+  "license_unknown_sources": 15,
+  "confirmed_new": 0,
+  "committed_batches": 111,
+  "spool_sha256": "9d5fca7f9d6dcf1bf0fe9267ec4dc1958858e62186cf63383b5dca287218fcf9",
+  "before": {
+    "sources": "1cabfcdfcdc898388f539864d299265b5bb09879d1eccf5484a904989f115b6f",
+    "candidates": "45645b84e0ce43d058686025905c1f84a8420d22116c5f6a5be0e00799bd2c9f",
+    "decisions": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "samples": "84534d089ab952fec174f2eab7b15af52a30350ce114a868299221ebda95cd96",
+    "lipid_observations": "47e86b62b3991e55619f474bf108c042bf516554cfa553f237e594991792540f",
+    "document_evidence": "dcefb15f70061eb9c6f8a82c16dcbff6cb055c34d5a41e9e2e257466661e7940"
+  },
+  "after": {
+    "sources": "43bad25adbcd93538d2ba561251e9f103403a4e016a5120c745dabb97d014683",
+    "candidates": "715b9e4087bb521f5d688fbfd7b4be5007f9f8e4eba5ecbe00c5b8f3b469d90a",
+    "decisions": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "samples": "84534d089ab952fec174f2eab7b15af52a30350ce114a868299221ebda95cd96",
+    "lipid_observations": "47e86b62b3991e55619f474bf108c042bf516554cfa553f237e594991792540f",
+    "document_evidence": "dcefb15f70061eb9c6f8a82c16dcbff6cb055c34d5a41e9e2e257466661e7940"
+  },
+  "identical_database_replay": false,
+  "publication": "No decisions or licenses granted by importer",
+  "generated_at": "2026-10-24T05:42:57.420487+00:00"
+}

@@ -1,0 +1,8 @@
+test_missing_values_and_unknown_basis (test_source_lipid.LipidSourceTests.test_missing_values_and_unknown_basis) ... ok
+test_percentage_bounds_hold (test_source_lipid.LipidSourceTests.test_percentage_bounds_hold) ... ok
+test_real_sources_emit_distinct_kinds_and_provenance (test_source_lipid.LipidSourceTests.test_real_sources_emit_distinct_kinds_and_provenance) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 1.074s
+
+OK

@@ -75,7 +75,7 @@ function citation(plant: PlantRecord): string {
         </div>
         <div class="collection-count" v-if="!plants.loading && !plants.error">
           <strong>{{ plants.total.toLocaleString('zh-CN') }}</strong>
-          <span>条记录标记为已核验</span>
+          <span>条可追溯研究记录</span>
         </div>
       </div>
 
@@ -93,10 +93,10 @@ function citation(plant: PlantRecord): string {
 
       <div v-if="plants.error" class="notice notice-error" role="status">
         <span class="notice-icon">!</span>
-        <div><strong>暂时无法连接科研数据</strong><p>{{ plants.error }}请确认 API 与隔离数据库已启动。</p></div>
+        <div><strong>暂时无法连接科研数据</strong><p>{{ plants.error }}请确认 VIRIDEXA API 与新数据库已启动。</p></div>
       </div>
       <div v-else-if="plants.loading" class="notice" role="status">
-        <span class="loading-mark"></span><p>正在读取已核验植物记录…</p>
+        <span class="loading-mark"></span><p>正在读取植物记录与来源证据…</p>
       </div>
       <div v-else-if="plants.items.length === 0" class="notice" role="status">
         <span class="notice-icon">⌕</span><div><strong>没有找到匹配记录</strong><p>可以尝试中文名或学名的另一种写法。</p></div>
@@ -106,7 +106,7 @@ function citation(plant: PlantRecord): string {
         <article v-for="(plant, index) in plants.items" :key="plant.id" class="record-card">
           <div class="record-topline">
             <span class="record-index">RECORD / {{ String(index + 1).padStart(2, '0') }}</span>
-            <span class="verified-mark"><span></span>记录标记已核验</span>
+          <span class="record-mark"><span></span>{{ plant.recordStatus === 'APPROVED' ? '复核已通过' : '研究预览 · 待复核' }}</span>
           </div>
           <div class="record-title-row">
             <div>
@@ -126,17 +126,17 @@ function citation(plant: PlantRecord): string {
             <div><span class="evidence-label">来源定位</span><span class="evidence-source">{{ citation(plant) }}</span></div>
           </div>
           <div class="record-foot">
-            <span>记录状态：已核验</span>
-            <span>身份状态：{{ plant.scientificNameStatus === 'VERIFIED_FROM_PRINTED_HEADING' ? '学名已据原页核验' : '学名复核中' }}</span>
+            <span>记录状态：{{ plant.recordStatus === 'APPROVED' ? '已审核' : '待审核' }}</span>
+            <span>身份状态：{{ plant.scientificNameStatus === 'VERIFIED_FROM_PRINTED_HEADING' ? '学名来源页已核对' : '学名待复核' }}</span>
           </div>
         </article>
         <div v-if="plants.total > plants.items.length" class="more-card">
           <span class="more-ornament">+</span>
           <strong>更多植物，等待你的探索。</strong>
-          <span>调整检索词，继续发现已核验资料。</span>
+          <span>调整检索词，继续探索可追溯资料。</span>
         </div>
       </div>
-      <div class="section-bottomline"><span>只展示数据库标记为公开且已核验的记录</span><span>学名与来源状态单独呈现</span></div>
+      <div class="section-bottomline"><span>记录保留提取、复核和发布状态</span><span>样本与来源证据可分别追溯</span></div>
     </section>
 
     <section class="principle-strip">

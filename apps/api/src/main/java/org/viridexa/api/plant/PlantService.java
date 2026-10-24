@@ -14,13 +14,13 @@ public class PlantService {
 
     public PlantSearchResult search(String query, int limit) {
         String normalizedQuery = query == null || query.isBlank() ? null : query.trim();
-        long total = mapper.countVerified(normalizedQuery);
-        List<PlantRecord> items = mapper.searchVerified(normalizedQuery, limit);
+        long total = mapper.countPlants(normalizedQuery);
+        List<PlantRecord> items = mapper.searchPlants(normalizedQuery, limit);
         return new PlantSearchResult(normalizedQuery, total, items);
     }
 
-    public PlantRecord getVerified(long id) {
-        return mapper.findVerifiedById(id)
+    public PlantRecord getById(long id) {
+        return mapper.findById(id)
                 .orElseThrow(() -> new PlantNotFoundException(id));
     }
 }

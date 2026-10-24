@@ -1,0 +1,55 @@
+#1 [internal] load local bake definitions
+#1 reading from stdin 363B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 262B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for mcr.microsoft.com/openjdk/jdk:21-ubuntu
+#3 DONE 0.1s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 91B done
+#4 DONE 0.0s
+
+#5 [1/3] FROM mcr.microsoft.com/openjdk/jdk:21-ubuntu@sha256:a5f9d2bc45904fc95fcd7adf26623a0fcdba10084992d237ef7efe085f08e901
+#5 resolve mcr.microsoft.com/openjdk/jdk:21-ubuntu@sha256:a5f9d2bc45904fc95fcd7adf26623a0fcdba10084992d237ef7efe085f08e901 0.0s done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 40.09MB 1.4s done
+#6 DONE 1.4s
+
+#7 [2/3] WORKDIR /app
+#7 CACHED
+
+#8 [3/3] COPY --chown=app:app target/viridexa-api-0.1.0-SNAPSHOT.jar /app/app.jar
+#8 DONE 0.3s
+
+#9 exporting to image
+#9 exporting layers
+#9 exporting layers 2.0s done
+#9 exporting manifest sha256:07902b1c7efdd7a893a34d5b54b8beb0188fe441f997251f3a57ab61585d3ac5 0.0s done
+#9 exporting config sha256:b3295336562d93024ae52e0dbb8399f4681665a20019087f395fbc83ffdd67b7 0.0s done
+#9 exporting attestation manifest sha256:e64fb2b2bb30b22c25dda799e6f705035ac369392860052d550a0251a95bb268 0.0s done
+#9 exporting manifest list sha256:eaf5b0758248b839c91c6564a753ce05005e07d1b9f265a9bafbce080912ebbc 0.0s done
+#9 naming to docker.io/library/viridexa-api:latest
+#9 naming to docker.io/library/viridexa-api:latest done
+#9 unpacking to docker.io/library/viridexa-api:latest
+#9 unpacking to docker.io/library/viridexa-api:latest 0.8s done
+#9 DONE 3.0s
+
+#10 resolving provenance for metadata file
+#10 DONE 0.0s
+ api  Built
+ Container viridexa-db-v1  Running
+ Container viridexa-api-1  Recreate
+ Container viridexa-api-1  Recreated
+ Container viridexa-web-1  Running
+ Container viridexa-db-v1  Waiting
+ Container viridexa-db-v1  Healthy
+ Container viridexa-api-1  Starting
+ Container viridexa-api-1  Started
+ Container viridexa-api-1  Waiting
+ Container viridexa-api-1  Healthy

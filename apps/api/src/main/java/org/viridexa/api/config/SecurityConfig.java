@@ -21,10 +21,11 @@ public class SecurityConfig {
                 .cors(cors -> {})
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(form -> form.disable())
-                .httpBasic(basic -> basic.disable())
+                .httpBasic(basic -> {})
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/plants/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/admin/science/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/plants/**", "/api/v1/science/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api-docs/**", "/swagger-ui/**", "/docs").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
                         .anyRequest().denyAll())
@@ -37,7 +38,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(allowedOrigin));
         configuration.setAllowedMethods(List.of("GET", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Accept", "Content-Type"));
+        configuration.setAllowedHeaders(List.of("Accept", "Content-Type", "Authorization"));
         configuration.setAllowCredentials(false);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

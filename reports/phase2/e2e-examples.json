@@ -1,0 +1,36 @@
+{
+  "taxonomy": {
+    "state": "CANDIDATE",
+    "locator": {
+      "record_id": "wfo-4100003335",
+      "archive_member": "taxon.tsv"
+    },
+    "source_path": "data/raw/wfo/wfo_plantlist_2026-06.zip",
+    "candidate_id": "039e63594bb262e93b961a29e34dce3cce3bfe42c06d584ff2b93a5a21e06142",
+    "source_sha256": "75f1ad1f371978c9e46f3044152c07ed276fe57be9fb9a15b3621b19cf231987",
+    "published_count": 0
+  },
+  "morphology": {
+    "state": "CANDIDATE",
+    "locator": {
+      "archive_member": "resource.csv",
+      "record_ordinal": 53721
+    },
+    "source_path": "data/raw/nhm_traits/combined.zip",
+    "candidate_id": "0002a7f5a47529d863fdfced899c46d349c250d73629a62e2960b805b6ca9021",
+    "source_sha256": "d444ba2eca78a4e640db890e7958387b3cc64e61222c515792c27607ba2aa251",
+    "published_count": 0
+  },
+  "lipid": {
+    "state": "CANDIDATE",
+    "locator": {
+      "field": "oil_content",
+      "component_index": null,
+      "all_extracted_samples_index": 64
+    },
+    "source_path": "data/fatty_acid_literature_extraction.json",
+    "candidate_id": "00577bcb3dc07f726c1694f3eefe210f46c4564bd97058d2563c8000d12c2ece",
+    "source_sha256": "e2d11c511ee6a1fc6d6dab61f420241818327d9ef536e09ba82abf6f288fca62",
+    "published_count": 0
+  }
+}

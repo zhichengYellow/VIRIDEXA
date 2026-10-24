@@ -32,6 +32,13 @@ class PlantControllerSecurityTest {
         mvc.perform(get("/api/v1/plants"))
                 .andExpect(status().isOk());
 
+        given(plantService.getById(1)).willReturn(new PlantRecord(
+                1L, "苏铁", "Cycas revoluta Thunb.", null, "苏铁科", "Cycas", null, null,
+                "REVIEW_PENDING", "VERIFIED_FROM_PRINTED_HEADING", "data/raw/course/课程设计资料.pdf",
+                "11", "1", "669e9adbfbdfb855d196e5389b2b8aee763a226fee0ce7f0a7e83bc5bab73685"));
+        mvc.perform(get("/api/v1/plants/1"))
+                .andExpect(status().isOk());
+
         mvc.perform(post("/api/v1/plants"))
                 .andExpect(status().isForbidden());
     }
