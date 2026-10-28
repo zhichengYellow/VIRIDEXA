@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts/pipeline")
 from source_lipid import _number, extract
 
 
-ROOT = Path(__file__).resolve().parents[2] / "VIRIDEXA-protected"
+ROOT = Path(__file__).resolve().parents[1]
 
 
 class LipidSourceTests(unittest.TestCase):

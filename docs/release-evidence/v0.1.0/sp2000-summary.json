@@ -1,0 +1,24 @@
+{
+  "mode": "APPLY",
+  "sourceVersion": "Catalogue of Life China 2022; user-supplied structured export",
+  "sourceSha256": "d566a32862eda72fdc4b48cb236e5b9e9322ae5b775be7ff9d7980761a705257",
+  "sourceFile": "data/raw/sp2000/中国生物物种名录_COL2022表格型数据20261028151005.xlsx",
+  "sourceRows": 301674,
+  "sourceClassification": {
+    "OTHER_KINGDOM": 178296,
+    "NON_SPECIES": 23607,
+    "ELIGIBLE_SOURCE_ROWS": 38787,
+    "NO_VALID_CHINESE_NAME": 210,
+    "NON_CANONICAL_SPECIES": 191,
+    "NOT_ACCEPTED": 60583
+  },
+  "publicCatalog": 60028,
+  "matchedPlants": 23670,
+  "excluded": {
+    "NO_EXACT_ACCEPTED_SOURCE_MATCH": 36358
+  },
+  "committedBatches": 95,
+  "fingerprintBefore": "e3733002e23543da008acf3da9c1e8930cf991a2beaff62003cc32d606b6e691",
+  "fingerprintAfter": "e3733002e23543da008acf3da9c1e8930cf991a2beaff62003cc32d606b6e691",
+  "licenseBoundary": "Factual name metadata only; workbook not redistributed; no scientific approval"
+}

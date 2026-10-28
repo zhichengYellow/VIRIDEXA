@@ -1,0 +1,8 @@
+<script setup lang="ts">
+import type {PlantRecord} from '../types/plant'
+import BotanicalImage from './BotanicalImage.vue'
+import {botanicalAsset} from '../ui/botanical'
+import UiIcon from './UiIcon.vue'
+defineProps<{plant:PlantRecord;compact?:boolean}>();defineEmits<{preview:[plant:PlantRecord]}>()
+</script>
+<template><article class="botanical-card" :class="{'is-compact':compact}"><RouterLink :to="`/plants/${plant.id}`" class="botanical-card-image" :aria-label="`查看 ${plant.nameZh||plant.scientificName} 的植物资料`"><BotanicalImage :name="plant.scientificName" :plant-id="plant.id" :caption="false" sizes="(max-width:700px) 90vw, 32vw"/><span v-if="botanicalAsset(plant.scientificName)" class="gallery-image-label">{{botanicalAsset(plant.scientificName)?.kind==='plate'?'历史植物图版':'植物影像'}}</span></RouterLink><div class="botanical-card-copy"><RouterLink :to="`/plants/${plant.id}`"><h3>{{plant.nameZh||plant.scientificName}}</h3><p class="botanical-latin">{{plant.nameZh?plant.scientificName:'中文名尚未记录'}}</p></RouterLink><p class="gallery-card-description">{{plant.morphology?plant.morphology.slice(0,120):plant.genusNameLatin?`从 ${plant.genusNameLatin} 的属名记录，认识它的名字与出处。`:'一页有来源的植物名录，等待你的发现。'}}</p><div class="botanical-card-taxonomy"><span v-if="plant.familyNameZh">{{plant.familyNameZh}}</span><span v-if="plant.genusNameLatin">{{plant.genusNameLatin}} 属名记录</span></div><footer><span>来源记录 · {{plant.sourceDocument||'名称目录'}}</span><button type="button" class="vx-icon-button" :aria-label="`快速预览 ${plant.nameZh||plant.scientificName}`" @click="$emit('preview',plant)"><UiIcon name="arrow" :size="17"/></button></footer></div></article></template>

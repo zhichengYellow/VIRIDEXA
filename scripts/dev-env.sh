@@ -24,7 +24,7 @@ for key in ('MYSQL_ROOT_PASSWORD', 'MYSQL_APP_PASSWORD', 'MYSQL_MIGRATOR_PASSWOR
     if not values.get(key):
         values[key] = subprocess.check_output(['openssl', 'rand', '-hex', '32'], text=True).strip()
 
-data_dir = values.get('VIRIDEXA_DATA_DIR', '../VIRIDEXA-protected/data')
+data_dir = values.get('VIRIDEXA_DATA_DIR', './data')
 values['VIRIDEXA_DATA_DIR'] = data_dir
 
 for obsolete in ('MYSQL_READONLY_PASSWORD', 'LEGACY_SNAPSHOT_PATH'):

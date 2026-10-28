@@ -42,7 +42,7 @@ def fingerprint():
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--root',type=Path,default=REPO.parent/'VIRIDEXA-protected')
+    p.add_argument('--root',type=Path,default=REPO)
     p.add_argument('--pipeline',choices=('botany','lipid','all'),default='all')
     p.add_argument('--apply',action='store_true')
     p.add_argument('--replay',type=Path,help='Replay an audited dry-run directory without reparsing original archives')

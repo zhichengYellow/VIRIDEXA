@@ -1,11 +1,13 @@
 # Scientific data protection report
 
+> Current layout (2026-10-28) supersedes the original move described below. See `DATA_RESTORATION_REPORT.md`; historical pre-move checks remain historical evidence.
+
 **Safety gate:** 2026-10-24, before moving protected files out of the Git worktree.
 **Result:** PASS. The source byte trees were moved intact after the gate; no source file was deleted or rewritten.
 
 ## Protected location and boundary
 
-The project reads source material from `../VIRIDEXA-protected/data` by default, configurable with `VIRIDEXA_DATA_DIR`. The former `database/` tree is retained at `../VIRIDEXA-protected/database` as an archive. Both paths are outside the VIRIDEXA Git worktree.
+Research inputs are managed inside this project at `data/` (`VIRIDEXA_DATA_DIR=./data`). Original archives remain read-only inputs; extracted results, image mappings and derived outputs retain their existing categories. Historical SQL archives are stored in `data/backups/legacy-database/` and must never be executed as current Flyway migrations. Compose mounts only `./data` read-only at `/science-inputs/data`, retaining the stored `data/...` source locators without mounting the repository or its secrets. Original documents remain subject to existing authorization and licensing controls. The external sibling backup is retained until a human decides it is no longer needed. The entire data tree is ignored by Git; ignored files are NOT protected from `git clean`, which must not be used on this tree.
 
 Before the move, the complete inventory was recomputed and every file size and SHA-256 matched the then-current asset manifest. The check included original archives, source documents, extracted JSON/CSV, database backups, image files, PDF page renders, crop mappings, and evidence screenshots. It verified:
 
@@ -16,7 +18,7 @@ Before the move, the complete inventory was recomputed and every file size and S
 - 231 image files, 140 files under extracted PDF evidence, and all 45 crop references in the image manifest resolve to files.
 - The source snapshot and protected input directories are not Docker volumes. The normal application profile mounts no research input. The opt-in snapshot-ingestion profile mounts only the verified SQL snapshot as read-only into a temporary source container; the target's only named volume contains the rebuildable VIRIDEXA development database.
 
-`git clean -ndx -- data database` was used as a dry run only and showed that an ignored in-worktree data directory would be removed. No destructive clean was run. After the safety gate passed, both trees were moved to the external protected location. The regenerated `ASSET_MANIFEST.md` now records 292 protected files totaling 222,484,424 bytes, including the preserved copy of the verified current snapshot. A later `git clean` or Docker volume removal cannot reach those sibling directories.
+`git clean -ndx -- data database` was used as a dry run only and showed that an ignored in-worktree data directory would be removed. No destructive clean was run. After the safety gate passed, both trees were moved to the external protected location. The regenerated `ASSET_MANIFEST.md` now records 292 protected files totaling 222,484,424 bytes, including the preserved copy of the verified current snapshot. The sibling backup remains separate. The restored in-project data must never be subject to destructive Git cleanup.
 
 ## Source database observations
 
@@ -28,6 +30,6 @@ The historical event records include nullable actors. VIRIDEXA's review model ke
 
 ## Clean-slate handling
 
-The old application source was not present in the project workspace. No JSP, Servlet, DAO, service, page, stylesheet, or API implementation was copied. The old schema and SQL files are archived outside the repository and are not mounted by the VIRIDEXA application. The new API connects only to the separately migrated `viridexa` schema. Historical snapshots remain available to an explicit data-ingestion adapter; they are not a runtime compatibility database.
+The old application source was not present in the project workspace. No JSP, Servlet, DAO, service, page, stylesheet, or API implementation was copied. The old schema and SQL files are archived in ignored `data/backups/legacy-database/` and are never imported automatically by the VIRIDEXA application. The new API connects only to the separately migrated `viridexa` schema. Historical snapshots remain available to an explicit data-ingestion adapter; they are not a runtime compatibility database.
 
-Original files remain immutable inputs. `ASSET_MANIFEST.md` can be regenerated with `scripts/build_asset_manifest.py`. Derived import reports and SQL are written under the external data directory's `processed/` folder and are excluded from the source inventory.
+Original files remain immutable inputs. `ASSET_MANIFEST.md` can be regenerated with `scripts/build_asset_manifest.py`. Derived import reports and SQL are written under the project data directory's `processed/` folder and are excluded from the source inventory.

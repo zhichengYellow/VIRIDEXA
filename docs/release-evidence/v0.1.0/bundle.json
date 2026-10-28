@@ -1,0 +1,136 @@
+{
+  "initialFiles": [
+    "index-BhOHHx2t.js",
+    "runtime-core.esm-bundler-D8IqZEFz.js"
+  ],
+  "initialJsBytes": 143206,
+  "initialGzipBytes": 56015,
+  "assets": [
+    {
+      "file": "AccountView-CcyIKU29.js",
+      "bytes": 3822,
+      "gzipBytes": 1951
+    },
+    {
+      "file": "AssistantView-7WDvD52L.js",
+      "bytes": 8924,
+      "gzipBytes": 4066
+    },
+    {
+      "file": "AtlasView-DKDy7I6Q.js",
+      "bytes": 12354,
+      "gzipBytes": 5359
+    },
+    {
+      "file": "AuthView-HM1caSMY.js",
+      "bytes": 10322,
+      "gzipBytes": 4807
+    },
+    {
+      "file": "KnowledgeGraphView-CT0WntNy.js",
+      "bytes": 457046,
+      "gzipBytes": 143812
+    },
+    {
+      "file": "NotFoundView-Bod-uwxp.js",
+      "bytes": 661,
+      "gzipBytes": 538
+    },
+    {
+      "file": "PlantDetailView-D9WKnaXw.css",
+      "bytes": 9031,
+      "gzipBytes": 2159
+    },
+    {
+      "file": "PlantDetailView-z8blBM2M.js",
+      "bytes": 15483,
+      "gzipBytes": 6593
+    },
+    {
+      "file": "ResearchContextBar-R4e7wcPf.js",
+      "bytes": 2264,
+      "gzipBytes": 1127
+    },
+    {
+      "file": "ReviewView-BswNyh1Z.js",
+      "bytes": 20689,
+      "gzipBytes": 7726
+    },
+    {
+      "file": "ReviewView-GzaN51c9.css",
+      "bytes": 1031,
+      "gzipBytes": 412
+    },
+    {
+      "file": "StatusIndicator-CTp4seWn.js",
+      "bytes": 1089,
+      "gzipBytes": 798
+    },
+    {
+      "file": "TechnologyView-DEnOrD4m.js",
+      "bytes": 21643,
+      "gzipBytes": 8230
+    },
+    {
+      "file": "TechnologyView-j6DSh6-w.css",
+      "bytes": 17595,
+      "gzipBytes": 4006
+    },
+    {
+      "file": "WorkbenchView-B9sx_YEk.js",
+      "bytes": 23737,
+      "gzipBytes": 8545
+    },
+    {
+      "file": "_plugin-vue_export-helper-BDNMzG2s.js",
+      "bytes": 84,
+      "gzipBytes": 100
+    },
+    {
+      "file": "access-C5A7429J.js",
+      "bytes": 258,
+      "gzipBytes": 188
+    },
+    {
+      "file": "api-Czk44dCT.js",
+      "bytes": 855,
+      "gzipBytes": 584
+    },
+    {
+      "file": "api-DlL2NfOl.js",
+      "bytes": 1315,
+      "gzipBytes": 678
+    },
+    {
+      "file": "api-d82UXY_b.js",
+      "bytes": 1928,
+      "gzipBytes": 1081
+    },
+    {
+      "file": "charts-BHfxVCQX.js",
+      "bytes": 506931,
+      "gzipBytes": 169380
+    },
+    {
+      "file": "index-BhOHHx2t.js",
+      "bytes": 80746,
+      "gzipBytes": 31853
+    },
+    {
+      "file": "index-CfZlBbOZ.css",
+      "bytes": 74314,
+      "gzipBytes": 16002
+    },
+    {
+      "file": "runtime-core.esm-bundler-D8IqZEFz.js",
+      "bytes": 62460,
+      "gzipBytes": 24162
+    },
+    {
+      "file": "workspaces-D5wVugYM.css",
+      "bytes": 21654,
+      "gzipBytes": 4740
+    }
+  ],
+  "scope": "Current emitted bytes only; no historical percentage claim"
+}

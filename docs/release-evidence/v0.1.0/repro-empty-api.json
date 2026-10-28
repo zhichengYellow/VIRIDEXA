@@ -1,0 +1,56 @@
+{
+  "/api/v1/plants?limit=2": {
+    "status": 200,
+    "body": {
+      "total": 0,
+      "items": []
+    }
+  },
+  "/api/v1/plants/2": {
+    "status": 404
+  },
+  "/api/v1/plants/2/media": {
+    "status": 404
+  },
+  "/api/v1/agent/meta": {
+    "status": 200,
+    "body": {
+      "publicPlantCount": 0,
+      "tools": [
+        "searchPlants",
+        "getPlantProfile",
+        "getGraphNeighbors",
+        "getResearchSamples",
+        "compareOilMeasurements",
+        "getEvidenceLineage"
+      ],
+      "notice": "只读公共证据；模型未配置时使用传统领域检索降级，不能视为真实模型联调。",
+      "model": "",
+      "limits": {
+        "maxModelCalls": 3,
+        "maxConcurrent": 2,
+        "totalTimeoutSeconds": 30,
+        "globalDailyRequests": 200,
+        "maxToolCalls": 6,
+        "userDailyRequests": 20,
+        "toolTimeoutSeconds": 5
+      },
+      "modelConfigured": false,
+      "publishedFactCount": 0,
+      "mode": "SEARCH_FALLBACK"
+    }
+  },
+  "/api-docs": {
+    "status": 401
+  },
+  "/actuator/health": {
+    "status": 200,
+    "body": {
+      "groups": [
+        "liveness",
+        "readiness"
+      ],
+      "status": "UP"
+    }
+  }
+}

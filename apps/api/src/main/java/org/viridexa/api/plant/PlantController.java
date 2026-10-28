@@ -25,8 +25,9 @@ public class PlantController {
     @GetMapping
     public PlantSearchResult search(
             @RequestParam(required = false) @Size(max = 120) String query,
-            @RequestParam(defaultValue = "3") @Min(1) @Max(50) int limit) {
-        return service.search(query, limit);
+            @RequestParam(defaultValue = "3") @Min(1) @Max(50) int limit,
+            @RequestParam(defaultValue = "0") @Min(0) long afterId) {
+        return afterId==0?service.search(query, limit):service.searchAfter(query,limit,afterId);
     }
 
     @GetMapping("/{id}")

@@ -1,0 +1,38 @@
+{
+  "completedAt": "2026-10-28T15:33:56+08:00",
+  "uniqueAutomatedTests": 341,
+  "passed": 341,
+  "failed": 0,
+  "skipped": 0,
+  "suites": [
+    {
+      "name": "Spring 单元 / 安全 / 模拟协议",
+      "passed": 152
+    },
+    {
+      "name": "真实隔离 MySQL / REST",
+      "passed": 71
+    },
+    {
+      "name": "Vue 交互及图像映射契约",
+      "passed": 43
+    },
+    {
+      "name": "Python 工程 / 来源 / 公开规则",
+      "passed": 53
+    },
+    {
+      "name": "科学管线解析与标准化",
+      "passed": 18
+    },
+    {
+      "name": "备份恢复约束回归",
+      "passed": 4
+    }
+  ],
+  "realModelCalls": 0,
+  "humanScientificReview": false,
+  "browserFixturesExcludedFromProduction": true,
+  "scope": "本地工程与隔离 MySQL；模型协议含 Mock，非真实 LLM 联调",
+  "productionReadonlyChecks": 20
+}

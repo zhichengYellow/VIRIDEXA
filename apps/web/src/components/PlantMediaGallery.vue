@@ -1,0 +1,12 @@
+<script setup lang="ts">
+import {computed,onMounted,onUnmounted,ref,watch} from 'vue'
+import BotanicalImage from './BotanicalImage.vue'
+type Photo={scientificName:string;author:string;license:string;sourceUrl:string;sha256:string;imageUrl:string;width:number;height:number}
+const props=defineProps<{plantId:number;name:string}>(),photos=ref<Photo[]>([]),chosen=ref(''),failed=ref(new Set<string>())
+let ctl:AbortController|null=null
+const available=computed(()=>photos.value.filter(p=>!failed.value.has(p.sha256))),current=computed(()=>available.value.find(p=>p.sha256===chosen.value)||available.value[0])
+async function load(){ctl?.abort();const request=new AbortController();ctl=request;photos.value=[];chosen.value='';failed.value=new Set();try{const r=await fetch(`/api/v1/plants/${props.plantId}/media`,{signal:request.signal});if(!r.ok)return;const rows=await r.json() as Photo[];if(ctl!==request||request.signal.aborted)return;photos.value=rows.filter(p=>p.scientificName===props.name&&['CC0','CC-BY'].includes(p.license)&&/^\/media\/[a-f0-9]{64}-full\.webp$/.test(p.imageUrl)&&/^https:\/\/www\.inaturalist\.org\/observations\/\d+$/.test(p.sourceUrl))}catch{ /* Static licensed illustration remains usable offline. */ }}
+function missing(){if(current.value)failed.value=new Set([...failed.value,current.value.sha256])}
+onMounted(load);watch([()=>props.plantId,()=>props.name],load);onUnmounted(()=>ctl?.abort())
+</script>
+<template><figure v-if="current" class="botanical-image plant-media-gallery"><img :src="current.imageUrl" :srcset="`${current.imageUrl.replace('-full.webp','-640.webp')} 640w, ${current.imageUrl.replace('-full.webp','-960.webp')} 960w, ${current.imageUrl} ${current.width}w`" sizes="(max-width:700px) 100vw, 60vw" :width="current.width" :height="current.height" :alt="`${name} · 来源物种影像`" decoding="async" @error="missing"/><nav v-if="available.length>1" class="plant-gallery-switch" aria-label="植物图片相册"><button v-for="(photo,i) in available" :key="photo.sha256" :aria-label="`查看第${i+1}张 ${name} 图片`" :aria-pressed="current.sha256===photo.sha256" @click="chosen=photo.sha256"><img :src="photo.imageUrl.replace('-full.webp','-640.webp')" :alt="`图${i+1}`" loading="lazy"/></button></nav><figcaption><a :href="current.sourceUrl" target="_blank" rel="noopener">{{current.author}} · {{current.license}} ↗</a><span>来源识别影像，非本平台鉴定证据</span></figcaption></figure><BotanicalImage v-else :name="name" eager sizes="(max-width:700px) 100vw, 60vw"/></template>

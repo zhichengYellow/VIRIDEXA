@@ -17,7 +17,7 @@ flowchart LR
   DB --> Agent[Future evidence-constrained Agent]
 ```
 
-The protected inputs live outside the Git worktree at `../VIRIDEXA-protected/data` by default. Override that location with `VIRIDEXA_DATA_DIR`. The adjacent `database/` directory is an archive of the previous schema and SQL files, not the VIRIDEXA schema. The normal application profile mounts no research data; the opt-in snapshot-ingestion profile mounts one checksum-verified SQL file read-only into a temporary source container. Deleting the target's named development volume only deletes the rebuildable VIRIDEXA database.
+Research inputs are managed inside this project at `data/` (`VIRIDEXA_DATA_DIR=./data`). Original archives remain read-only inputs; extracted results, image mappings and derived outputs retain their existing categories. Historical SQL archives are stored in `data/backups/legacy-database/` and must never be executed as current Flyway migrations. Compose mounts only `./data` read-only at `/science-inputs/data`, retaining the stored `data/...` source locators without mounting the repository or its secrets. Original documents remain subject to existing authorization and licensing controls. The external sibling backup is retained until a human decides it is no longer needed. The entire data tree is ignored by Git; ignored files are NOT protected from `git clean`, which must not be used on this tree.
 
 The v1 database is created by Flyway on the new MySQL service. The API uses a `SELECT`-only database user. A separate migrator user applies schema migrations, and a separate insert-only importer user writes the output of explicit pipeline runs. No API connection points to a historical schema or snapshot.
 

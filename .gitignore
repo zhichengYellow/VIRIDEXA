@@ -1,6 +1,9 @@
-# Protected science assets and database archives are kept outside this Git worktree.
-data/
-database/
+# Project-local research inputs are private/large and must never enter Git.
+# This includes papers, source images with unknown redistribution rights, SP2000,
+# iPlant, extracted tables, SQL archives and generated pipeline output.
+# Ignore rules do not protect data from git clean; never clean these directories.
+/data/
+/database/
 
 # Rebuildable pipeline outputs and local environment.
 .venv/
@@ -14,6 +17,20 @@ database/
 *.log
 .DS_Store
 
-# Rebuildable scientific staging spools (reports remain tracked)
-reports/phase2/**/candidates.jsonl
+# Rebuildable scientific staging spools (existing reviewed historical reports remain tracked)
+reports/**/candidates.jsonl
 __pycache__/
+
+# Local Agent budget ledger (no scientific inputs)
+.runtime/
+
+# Raw acceptance runs may contain source payloads, large screenshots or local paths.
+# Curated, sanitized release evidence belongs in docs/release-evidence/.
+/reports/
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.sql.gz
+*.dump

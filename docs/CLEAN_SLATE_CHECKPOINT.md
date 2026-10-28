@@ -12,9 +12,9 @@
 | Current snapshot | PASS — SHA-256 `367f37bb5c77399141786f0b47d153e70a232c3cce4d9c3073c4bad150ec6063`; gzip valid and restored successfully in a temporary isolated MySQL service. |
 | Extracted evidence and media | PASS — 231 images, 140 extracted PDF evidence files, and 45 mapped crop references existed and resolved. |
 | Cleanup boundary | PASS — `git clean -ndx` demonstrated the original in-repository paths were at risk; no destructive clean ran. Protected `data/` and archived `database/` trees were moved outside Git after the safety gate, and the verified current snapshot was copied into the protected archive. |
-| Current protected inventory | PASS — `docs/ASSET_MANIFEST.md` lists 292 source/archive files totaling 222,484,424 bytes. Pipeline outputs are under external `processed/` and are not source inputs. |
+| Current protected inventory | PASS — `docs/ASSET_MANIFEST.md` lists 292 source/archive files totaling 222,484,424 bytes. Pipeline outputs are under `data/processed/` and are not source inputs. |
 
-Protected inputs now live at `../VIRIDEXA-protected/data`; the old SQL schema archive is at `../VIRIDEXA-protected/database`. The ordinary app profile has no research-data mount. The optional snapshot ingestion profile mounts one SQL snapshot read-only into a temporary source service. The only named Docker volume contains the rebuildable VIRIDEXA target database.
+Research inputs are managed inside this project at `data/` (`VIRIDEXA_DATA_DIR=./data`). Original archives remain read-only inputs; extracted results, image mappings and derived outputs retain their existing categories. Historical SQL archives are stored in `data/backups/legacy-database/` and must never be executed as current Flyway migrations. Compose mounts only `./data` read-only at `/science-inputs/data`, retaining the stored `data/...` source locators without mounting the repository or its secrets. Original documents remain subject to existing authorization and licensing controls. The external sibling backup is retained until a human decides it is no longer needed. The entire data tree is ignored by Git; ignored files are NOT protected from `git clean`, which must not be used on this tree.
 
 ## Clean-slate implementation
 

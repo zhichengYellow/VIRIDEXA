@@ -41,7 +41,7 @@ def configured_data_dir() -> Path:
                 if line.startswith("VIRIDEXA_DATA_DIR="):
                     configured = line.split("=", 1)[1].strip()
                     break
-    path = Path(configured) if configured else ROOT.parent / "VIRIDEXA-protected" / "data"
+    path = Path(configured) if configured else ROOT / "data"
     return (ROOT / path).resolve() if not path.is_absolute() else path.resolve()
 
 

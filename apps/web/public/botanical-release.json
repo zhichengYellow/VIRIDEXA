@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-28",
+  "scope": "v0.1.0 本地真实数据验收快照；不是当前部署实时统计",
+  "chineseNames": 23704,
+  "chineseCoveragePercent": 39.49,
+  "sp2000Version": "2022",
+  "sp2000Matches": 23670,
+  "media": 21,
+  "mediaPlants": 17,
+  "withMainImage": 19,
+  "protectedHashesMatched": 292,
+  "scientificFacts": 0
+}

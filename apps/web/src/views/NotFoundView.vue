@@ -1,0 +1,1 @@
+<template><main class="account-system-page not-found-page"><p class="section-kicker">VIRIDEXA / 404</p><h1>没有找到这个研究入口</h1><p>地址可能已变更。已选研究对象仍应通过对应的公开记录地址访问。</p><RouterLink class="plain-button" to="/explore">返回植物探索</RouterLink></main></template>

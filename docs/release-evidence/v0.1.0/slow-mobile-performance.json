@@ -1,0 +1,90 @@
+{
+  "scope": "Single local 375px observation, cache disabled,150ms RTT,200000 bytes/s download,4x CPU; no field INP claim",
+  "cls": 0,
+  "lcpMs": 2832,
+  "navigation": [
+    {
+      "domContentLoadedMs": 2093.399999976158,
+      "loadMs": 2788.800000011921
+    }
+  ],
+  "overflow": false,
+  "resources": [
+    {
+      "encodedBodySize": 31973,
+      "name": "/assets/index-Cbu5yhoY.js",
+      "transferSize": 32273
+    },
+    {
+      "encodedBodySize": 24297,
+      "name": "/assets/runtime-core.esm-bundler-D8IqZEFz.js",
+      "transferSize": 24597
+    },
+    {
+      "encodedBodySize": 16668,
+      "name": "/assets/index-CfZlBbOZ.css",
+      "transferSize": 16968
+    },
+    {
+      "encodedBodySize": 23,
+      "name": "/api/v1/account/session",
+      "transferSize": 323
+    },
+    {
+      "encodedBodySize": 345,
+      "name": "/api/v1/plants/2",
+      "transferSize": 645
+    },
+    {
+      "encodedBodySize": 269,
+      "name": "/api/v1/plants/9445",
+      "transferSize": 569
+    },
+    {
+      "encodedBodySize": 271,
+      "name": "/api/v1/plants/30610",
+      "transferSize": 571
+    },
+    {
+      "encodedBodySize": 13796,
+      "name": "/botanical/ginkgo-biloba-hero-384.webp",
+      "transferSize": 14096
+    },
+    {
+      "encodedBodySize": 24150,
+      "name": "/botanical/camellia-oleifera-384.webp",
+      "transferSize": 24450
+    },
+    {
+      "encodedBodySize": 2,
+      "name": "/api/v1/plants/2/media",
+      "transferSize": 302
+    },
+    {
+      "encodedBodySize": 749,
+      "name": "/api/v1/plants/9445/media",
+      "transferSize": 1049
+    },
+    {
+      "encodedBodySize": 821,
+      "name": "/api/v1/plants/30610/media",
+      "transferSize": 1121
+    },
+    {
+      "encodedBodySize": 17684,
+      "name": "/botanical/jatropha-curcas-plate-384.webp",
+      "transferSize": 17984
+    },
+    {
+      "encodedBodySize": 75010,
+      "name": "/media/05a3a25b3a2fee9cbf32c126b20134c304c957dbf7a9650a7c125eea6f63e02f-640.webp",
+      "transferSize": 75310
+    },
+    {
+      "encodedBodySize": 68306,
+      "name": "/media/1b841c64d998d99effc018f06427322853db127c33f0a2f588be1319d6e5a9be-640.webp",
+      "transferSize": 68606
+    }
+  ],
+  "width": 375
+}

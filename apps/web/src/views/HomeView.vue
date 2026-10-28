@@ -1,148 +1,21 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { usePlantsStore } from '../stores/plants'
-import type { PlantRecord } from '../types/plant'
-
-const plants = usePlantsStore()
-onMounted(() => plants.search(''))
-
-function submitSearch() {
-  void plants.search(plants.query)
-}
-
-function citation(plant: PlantRecord): string {
-  const pages = plant.sourcePrintedPages || plant.sourcePages
-  if (plant.sourceDocument && pages) return `${plant.sourceDocument} · 第 ${pages} 页`
-  if (plant.sourceDocument) return plant.sourceDocument
-  if (pages) return `原始资料第 ${pages} 页`
-  return '来源定位待补充'
-}
+import {onMounted,onUnmounted,ref} from 'vue'
+import {useRouter} from 'vue-router'
+import type {PlantRecord} from '../types/plant'
+import BotanicalImage from '../components/BotanicalImage.vue'
+import DiscoveryPaths from '../components/DiscoveryPaths.vue'
+import UiIcon from '../components/UiIcon.vue'
+import {useOnboarding} from '../stores/onboarding'
+const router=useRouter(),guide=useOnboarding(),query=ref(''),featured=ref<PlantRecord[]>([]),loading=ref(true),controller=new AbortController()
+onMounted(async()=>{const rows=await Promise.allSettled([2,9445,30610].map(id=>fetch(`/api/v1/plants/${id}`,{signal:controller.signal}).then(async r=>{if(!r.ok)throw Error();return await r.json() as PlantRecord})));if(!controller.signal.aborted){featured.value=rows.flatMap(r=>r.status==='fulfilled'?[r.value]:[]);loading.value=false}})
+onUnmounted(()=>controller.abort())
+function search(){void router.push({path:'/explore',query:query.value.trim()?{q:query.value.trim()}:{}})}
 </script>
-
-<template>
-  <main>
-    <section class="hero-shell">
-      <div class="hero-orbit orbit-one"></div>
-      <div class="hero-orbit orbit-two"></div>
-      <div class="hero-inner">
-        <div class="hero-copy">
-          <div class="eyebrow"><span class="eyebrow-line"></span>植物知识 · 科学证据 · 可追溯</div>
-          <h1>读懂植物，<br /><em>从证据开始。</em></h1>
-          <p class="hero-description">
-            把植物名称、形态与科研记录连回可靠来源。<br class="desktop-break" />
-            让探索更直观，让每一次发现都有据可查。
-          </p>
-          <div class="hero-stamp">
-            <span class="stamp-index">01</span>
-            <span>以数据库审核状态为准</span>
-            <span class="stamp-rule"></span>
-            <span class="stamp-text">RESEARCH PREVIEW</span>
-          </div>
-        </div>
-
-        <div class="hero-illustration" aria-hidden="true">
-          <div class="illustration-ring ring-outer"></div>
-          <div class="illustration-ring ring-inner"></div>
-          <svg viewBox="0 0 430 430" fill="none" class="botanical-art">
-            <path d="M211 370C209 288 218 205 239 93" stroke="#426956" stroke-width="2" stroke-linecap="round" />
-            <path d="M213 301C173 253 134 226 83 212" stroke="#678873" stroke-width="1.6" stroke-linecap="round" />
-            <path d="M222 251C262 207 303 185 352 177" stroke="#678873" stroke-width="1.6" stroke-linecap="round" />
-            <path d="M228 207C200 174 184 141 178 108" stroke="#7c9984" stroke-width="1.5" stroke-linecap="round" />
-            <path d="M238 148C267 118 294 103 326 97" stroke="#7c9984" stroke-width="1.5" stroke-linecap="round" />
-            <path d="M211 302C164 305 132 289 113 257C150 249 183 261 211 302Z" fill="#d9e6d9" stroke="#6c8b76" stroke-width="1.5" />
-            <path d="M224 256C243 215 275 194 321 193C307 229 276 251 224 256Z" fill="#e1eadf" stroke="#6c8b76" stroke-width="1.5" />
-            <path d="M227 207C189 194 168 167 165 129C199 142 220 167 227 207Z" fill="#d7e5d9" stroke="#6c8b76" stroke-width="1.5" />
-            <path d="M237 151C246 117 272 95 311 89C300 122 276 143 237 151Z" fill="#e6ecdd" stroke="#6c8b76" stroke-width="1.5" />
-            <path d="M212 347C179 319 153 310 126 315C146 345 173 358 212 347Z" fill="#e5ecdf" stroke="#8da394" stroke-width="1.3" />
-            <path d="M217 370H365" stroke="#b5c5b6" stroke-width="1.2" />
-            <circle cx="239" cy="93" r="4" fill="#9db79f" />
-            <circle cx="83" cy="212" r="3" fill="#b4c8b6" />
-            <circle cx="352" cy="177" r="3" fill="#b4c8b6" />
-            <path d="M66 376C112 366 157 367 203 376" stroke="#d7ded5" stroke-width="1" />
-          </svg>
-          <div class="art-label label-top">MORPHOLOGY <span>形态</span></div>
-          <div class="art-label label-bottom">EVIDENCE <span>证据</span></div>
-        </div>
-      </div>
-      <div class="hero-index">V / 01 <span></span> PLANT KNOWLEDGE</div>
-    </section>
-
-    <section id="explore" class="explore-section">
-      <div class="section-heading">
-        <div>
-          <div class="section-kicker">EXPLORE THE COLLECTION <span>探索植物</span></div>
-          <h2>从一个名字，找到它的来处。</h2>
-        </div>
-        <div class="collection-count" v-if="!plants.loading && !plants.error">
-          <strong>{{ plants.total.toLocaleString('zh-CN') }}</strong>
-          <span>条可追溯研究记录</span>
-        </div>
-      </div>
-
-      <form class="search-panel" @submit.prevent="submitSearch">
-        <span class="search-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.5"/><path d="m16 16 4.2 4.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        </span>
-        <input v-model="plants.query" aria-label="搜索植物名称" placeholder="试试中文名、别名或拉丁学名" />
-        <span class="search-hint">名称检索</span>
-        <button type="submit" :disabled="plants.loading" class="search-button">
-          {{ plants.loading ? '检索中' : '开始探索' }}
-          <span aria-hidden="true">↗</span>
-        </button>
-      </form>
-
-      <div v-if="plants.error" class="notice notice-error" role="status">
-        <span class="notice-icon">!</span>
-        <div><strong>暂时无法连接科研数据</strong><p>{{ plants.error }}请确认 VIRIDEXA API 与新数据库已启动。</p></div>
-      </div>
-      <div v-else-if="plants.loading" class="notice" role="status">
-        <span class="loading-mark"></span><p>正在读取植物记录与来源证据…</p>
-      </div>
-      <div v-else-if="plants.items.length === 0" class="notice" role="status">
-        <span class="notice-icon">⌕</span><div><strong>没有找到匹配记录</strong><p>可以尝试中文名或学名的另一种写法。</p></div>
-      </div>
-
-      <div v-else class="record-grid">
-        <article v-for="(plant, index) in plants.items" :key="plant.id" class="record-card">
-          <div class="record-topline">
-            <span class="record-index">RECORD / {{ String(index + 1).padStart(2, '0') }}</span>
-          <span class="record-mark"><span></span>{{ plant.recordStatus === 'APPROVED' ? '复核已通过' : '研究预览 · 待复核' }}</span>
-          </div>
-          <div class="record-title-row">
-            <div>
-              <h3>{{ plant.nameZh && plant.nameZh !== plant.scientificName ? plant.nameZh : '中文名待核' }}</h3>
-              <p class="latin-name">{{ plant.scientificName || '学名待补充' }}</p>
-            </div>
-            <div class="record-id">VX<span>{{ String(plant.id).padStart(4, '0') }}</span></div>
-          </div>
-          <div class="taxonomy-row">
-            <span v-if="plant.familyNameZh">{{ plant.familyNameZh }}</span>
-            <span v-if="plant.genusNameLatin">{{ plant.genusNameLatin }}</span>
-            <span v-if="plant.nameEn">{{ plant.nameEn }}</span>
-          </div>
-          <p v-if="plant.morphology" class="record-description">{{ plant.morphology }}</p>
-          <div class="evidence-row">
-            <span class="evidence-icon" aria-hidden="true">↗</span>
-            <div><span class="evidence-label">来源定位</span><span class="evidence-source">{{ citation(plant) }}</span></div>
-          </div>
-          <div class="record-foot">
-            <span>记录状态：{{ plant.recordStatus === 'APPROVED' ? '已审核' : '待审核' }}</span>
-            <span>身份状态：{{ plant.scientificNameStatus === 'VERIFIED_FROM_PRINTED_HEADING' ? '学名来源页已核对' : '学名待复核' }}</span>
-          </div>
-        </article>
-        <div v-if="plants.total > plants.items.length" class="more-card">
-          <span class="more-ornament">+</span>
-          <strong>更多植物，等待你的探索。</strong>
-          <span>调整检索词，继续探索可追溯资料。</span>
-        </div>
-      </div>
-      <div class="section-bottomline"><span>记录保留提取、复核和发布状态</span><span>样本与来源证据可分别追溯</span></div>
-    </section>
-
-    <section class="principle-strip">
-      <div class="principle-leaf">✳</div>
-      <div><span class="principle-kicker">OUR PRINCIPLE</span><h2>每个结论，都有自己的证据路径。</h2></div>
-      <p>植物身份、来源定位和审核状态各自记录。待审核候选不会被混作正式科研结论。</p>
-    </section>
-  </main>
-</template>
+<template><main class="museum-home">
+<section class="museum-hero" aria-labelledby="museum-title"><BotanicalImage name="Ginkgo biloba L." eager :caption="false" sizes="100vw"/><div class="museum-hero-shade"></div><div class="museum-hero-copy"><p class="museum-eyebrow">VIRIDEXA · 植序 / A LIVING BOTANICAL MUSEUM</p><h1 id="museum-title">每一片叶子，<br/>都藏着一个世界。</h1><p class="museum-hero-description">从一朵花的颜色，到一片叶子的脉络。<br/>走进植物的世界，发现那些藏在自然里的故事。</p><div class="museum-hero-actions"><RouterLink class="museum-button light" to="/explore">走进植物世界 <UiIcon name="arrow"/></RouterLink><RouterLink class="museum-text-button" to="/plants/2">认识一株植物 <span>↗</span></RouterLink></div></div><div class="museum-hero-bottom"><a href="#encounters">向下漫游 <span>↓</span></a><span>银杏影像 · Dan Keck / CC0 · 图鉴插图</span><span>慢一点，发现多一点。</span></div></section>
+<section id="encounters" class="museum-encounters"><header class="museum-section-heading"><p class="museum-eyebrow">01 / A FEW BEAUTIFUL ENCOUNTERS</p><h2>不必走得很远。<br/><em>先与一株植物相遇。</em></h2><p>一个熟悉的名字，一次新的凝视。<br/>把平常略过的细节，留给这一刻。</p></header><div v-if="featured.length" class="museum-encounter-grid"><article v-for="(plant,index) in featured" :key="plant.id" class="museum-encounter" :class="'encounter-'+index"><RouterLink :to="`/plants/${plant.id}`" :aria-label="`认识 ${plant.nameZh||plant.scientificName}`"><BotanicalImage :name="plant.scientificName" :plant-id="plant.id" :caption="false" sizes="(max-width:700px) 90vw, 40vw"/><span class="museum-plate-number">{{String(index+1).padStart(2,'0')}} / COLLECTION</span></RouterLink><div class="museum-encounter-caption"><div><h3>{{plant.nameZh||plant.scientificName}}</h3><em>{{plant.scientificName}}</em></div><RouterLink :to="`/plants/${plant.id}`" :aria-label="`走近 ${plant.nameZh||plant.scientificName}`">↗</RouterLink></div><p>{{plant.morphology|| '从一幅真实影像，走向它的名称与来源。'}}</p></article></div><p v-else class="museum-loading">{{loading?'植物画廊正在轻轻展开…':'精选资料暂时没有读到。'}} <RouterLink to="/explore">从图鉴继续探索 →</RouterLink></p><RouterLink class="museum-inline-link" to="/explore">去植物画廊，遇见更多名字 <UiIcon name="arrow"/></RouterLink></section>
+<section class="museum-details"><div class="museum-detail-image"><BotanicalImage name="Camellia oleifera" :caption="false" sizes="(max-width:700px) 100vw, 50vw"/><span>观察影像 · Camellia oleifera / USDA ARS · 公有领域</span></div><div class="museum-detail-copy"><p class="museum-eyebrow">02 / THE ART OF NOTICING</p><h2>从一个小细节，<br/><em>打开新的好奇。</em></h2><p>叶子的轮廓、花朵的颜色，或是一株植物的姿态。<br/>不必先懂专业词汇，跟着资料里的线索，慢慢认识。</p><DiscoveryPaths/></div></section>
+<section class="museum-connections"><div><p class="museum-eyebrow">03 / EVERYTHING IS CONNECTED</p><h2>一株植物，<br/>不止一个名字。</h2><p>它的名称从哪里来？它与哪些分类、样本和资料相连？<br/>轻点一个节点，沿着真实的线索，走向下一次发现。</p><RouterLink class="museum-button" to="/knowledge-graph?nodeId=plant:2">看看它与什么相连 <UiIcon name="arrow"/></RouterLink></div><div class="museum-network" aria-label="关系探索的示意，实际关系打开后查询"><span class="network-orbit orbit-one"></span><span class="network-orbit orbit-two"></span><span class="network-seed">银杏<em>Ginkgo biloba</em></span><span class="network-label label-one">名称</span><span class="network-label label-two">分类</span><span class="network-label label-three">来源</span><small>探索方式示意 · 不作为科学关系证据</small></div></section>
+<section class="museum-science"><p class="museum-eyebrow">04 / FOLLOW YOUR CURIOSITY</p><h2>看见自然，<em>也看见背后的科学。</em></h2><div class="museum-science-rows"><RouterLink to="/assistant?plantId=2"><span>01</span><div><h3>问问植序</h3><p>把日常的好奇带进来，一起寻找有出处的回答。</p><small>登录后使用 · 当前为领域检索模式，未连接真实大模型</small></div><UiIcon name="arrow"/></RouterLink><RouterLink to="/workbench?plantId=2"><span>02</span><div><h3>把发现放上研究桌</h3><p>从独立样本、计量单位到原始来源，再靠近一点。</p><small>科研实验台 · 登录后使用</small></div><UiIcon name="arrow"/></RouterLink><RouterLink to="/technology"><span>03</span><div><h3>每一份知识，都有来处</h3><p>走到数字植物馆的幕后，看看资料怎样成为可追溯的知识。</p><small>数据来源 · 科学审核 · 幕后技术</small></div><UiIcon name="arrow"/></RouterLink></div></section>
+<section class="museum-invitation"><p class="museum-eyebrow">THE NEXT DISCOVERY IS YOURS</p><h2>今天，你想认识谁？</h2><form @submit.prevent="search"><UiIcon name="search"/><input v-model="query" aria-label="搜索植物名称" placeholder="输入一个植物名字，比如：银杏"/><button aria-label="搜索植物" type="submit"><UiIcon name="arrow"/></button></form><div><RouterLink to="/explore">随意逛逛 →</RouterLink><button @click="guide.begin">第一次来？跟着引导走一遍</button></div><p class="museum-fineprint">资料按来源状态呈现；公开可浏览，不等于已经人工科学核验。影像仅用于图鉴展示。</p></section>
+</main></template>

@@ -1,0 +1,15 @@
+{
+  "trackedSourceTreeFiles": 434,
+  "forbiddenTrackedPaths": [],
+  "filesOver2MB": [],
+  "stagedTreeGitleaksFindings": 0,
+  "originalReachableHistoryCommits": 2,
+  "originalHistoryGitleaksFindings": 0,
+  "sourceLicenseChosen": false,
+  "rawResearchDataIncluded": false,
+  "remote": "zhichengYellow/VIRIDEXA",
+  "visibility": "PUBLIC",
+  "branch": "main",
+  "pushPolicy": "normal fast-forward only; tag after successful branch push",
+  "whitespaceNote": "Applied immutable V15 retains a cosmetic blank line at EOF; bytes preserved to keep Flyway checksum stable"
+}

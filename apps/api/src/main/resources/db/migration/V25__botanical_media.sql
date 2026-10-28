@@ -1,0 +1,23 @@
+CREATE TABLE botanical_media (
+  id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  plant_id BIGINT UNSIGNED NOT NULL,
+  scientific_name VARCHAR(255) NOT NULL,
+  author VARCHAR(255) NOT NULL,
+  license_code VARCHAR(32) NOT NULL,
+  source_url VARCHAR(1000) NOT NULL,
+  source_taxon_id BIGINT NOT NULL,
+  source_observation_id BIGINT NOT NULL,
+  sha256 CHAR(64) NOT NULL,
+  public_filename VARCHAR(255) NOT NULL,
+  width INT NOT NULL,
+  height INT NOT NULL,
+  state VARCHAR(24) NOT NULL DEFAULT 'PUBLIC',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_botanical_media_plant FOREIGN KEY (plant_id) REFERENCES plant(id),
+  CONSTRAINT uq_botanical_media_sha UNIQUE (sha256),
+  CONSTRAINT uq_botanical_media_observation UNIQUE (source_observation_id),
+  CONSTRAINT ck_botanical_media_dimensions CHECK(width>0 AND height>0),
+  CONSTRAINT ck_botanical_media_license CHECK(license_code IN('CC0','CC-BY')),
+  CONSTRAINT ck_botanical_media_state CHECK(state IN('PUBLIC','RESTRICTED')),
+  INDEX ix_botanical_media_plant_state (plant_id, state)
+);

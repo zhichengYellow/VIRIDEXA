@@ -1,0 +1,7 @@
+package org.viridexa.api.protection;
+import org.junit.jupiter.api.Test;import org.springframework.mock.web.*;import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;import org.springframework.security.core.context.SecurityContextHolder;import java.util.List;
+import org.viridexa.api.config.SessionAuthentication;
+import static org.junit.jupiter.api.Assertions.*;
+class SessionCsrfTest {
+ @Test void loginReturnsWithOneFreshSessionTokenReadyForConcurrentRequests(){var q=new MockHttpServletRequest();var r=new MockHttpServletResponse();var repository=new HttpSessionCsrfTokenRepository();var old=repository.generateToken(q);repository.saveToken(old,q,r);String previous=q.getSession().getId();q.setRequestedSessionId(previous);q.setRequestedSessionIdValid(true);q.setRequestedSessionIdFromCookie(true);q.getSession().setAttribute("agentOwner","previous-user-run-owner");try{SessionAuthentication.establish(UsernamePasswordAuthenticationToken.authenticated("member",null,List.of()),q,r);var current=repository.loadToken(q);assertNotNull(current,"New CSRF token must be stored before parallel requests begin");assertNotEquals(old.getToken(),current.getToken());assertNotEquals(previous,q.getSession().getId());assertNull(q.getSession().getAttribute("agentOwner"));assertEquals(current.getToken(),repository.loadDeferredToken(q,r).get().getToken());}finally{SecurityContextHolder.clearContext();}}
+}

@@ -86,7 +86,7 @@ def scan(root, manifest):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--root', type=Path, default=Path(__file__).resolve().parents[2].parent / 'VIRIDEXA-protected')
+    parser.add_argument('--root', type=Path, default=Path(__file__).resolve().parents[2])
     parser.add_argument('--manifest', type=Path, default=Path('docs/ASSET_MANIFEST.md'))
     parser.add_argument('--report', type=Path, default=Path('reports/phase2/source-audit.json'))
     parser.add_argument('--dry-run', action='store_true')

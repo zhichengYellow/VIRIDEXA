@@ -1,0 +1,30 @@
+{
+  "counts": {
+    "plants": 60031,
+    "publicCatalog": 60028,
+    "withChineseName": 23704,
+    "publicWithChineseName": 23701,
+    "searchableChineseNames": 23704,
+    "additionalChineseAliases": 0,
+    "withMainImage": 19,
+    "withChineseNameAndMainImage": 19,
+    "withEvidence": 60031
+  },
+  "chineseCoveragePercent": 39.49,
+  "publicChineseCoveragePercent": 39.48,
+  "imageCoveragePercent": 0.0317,
+  "withoutChineseName": 36327,
+  "dynamicMedia": 21,
+  "dynamicMediaPlants": 17,
+  "licenses": {
+    "CC-BY": 18,
+    "CC0": 3
+  },
+  "mediaSourceDistribution": {
+    "iNaturalist": 21,
+    "WikimediaStaticFallback": 3
+  },
+  "identityConflicts": 0,
+  "formalScientificFacts": 0,
+  "note": "Catalogue-entry coverage; distinct biological species count is unresolved. Name metadata is source-reported, media identification is upstream, not human scientific review."
+}

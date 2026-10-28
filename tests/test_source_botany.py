@@ -6,7 +6,7 @@ from pathlib import Path
 from scripts.pipeline.source_botany import _taxonomy, extract
 
 
-DATA = Path("/Users/binyellow/VIRIDEXA-protected")
+DATA = Path(__file__).resolve().parents[1]
 
 
 class SourceBotanyTests(unittest.TestCase):

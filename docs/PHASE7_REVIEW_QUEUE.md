@@ -1,0 +1,13 @@
+# Phase 7 human review queue
+
+Generate with `python scripts/pipeline/phase7_review_queue.py`. All counts, license/integrity groups, candidate states and source metadata are queried live through read-only `SELECT`s using `scripts/pipeline/run_science.py:mysql(..., user='root')`. Historical oil and trait traces are joined by exact candidate ID; the runner does not write database or protected source data. Outputs are `reports/phase7/review-queue.json`, `catalog-proposals.json`, and `data-audit.json`.
+
+Each scientific candidate item includes its live raw and normalized payloads, candidate/content ID, source version ID/path/SHA-256/license/integrity, locator, current review state/version, and decision history. Oil rows also carry the legacy sample/plant references, any matching course sample metadata, and explicit consistency checks against the image-checked historical trace. A basis absent in the live normalized payload remains `null`; the historical image verification is not represented as a scientific basis or approval. Trait entries retain the two historical source-record keys and check current candidate hash and locator against the prepared trace.
+
+Five deterministic catalogue proposals retain two separate chains: the actual course taxon → evidence → source asset → source-version chain in `catalog_sources`, and the imported normalized taxonomy candidates. They are not interchangeable sources. Each proposal includes checks, candidate review links and a `/review?catalogId=<plant-id>` catalogue link. These are proposals only. They do not claim an external catalogue authority or invent a human reviewer. The named reviewer, name verification and license/permission review remain required checkpoints.
+
+All six historical morphology candidates currently lack the normalized plant-identity field required by approval validation. Their `approval_blockers` explicitly preserve this gap together with unknown source permission. A source-grounded normalization revision is required after identity verification; the immutable historical payloads have not been rewritten. The 88 oil rows preserve separate course and independent scientific sample relationships. All independent samples remain unlinked, and an as-reported percentage is not a verified dry/wet mass basis.
+
+The lipid shortlist requires explicit linked sample identity, unit and basis. It currently returns zero eligible candidate IDs. No taxon identity is inferred from paper metadata or unrelated course rows.
+
+Use the emitted `counts` and `license_groups` as the current audit. The Phase 2B report and Phase 5 audit are historical context only; they are not baked into the generator. Re-run the script to reproduce the live counts and row checks.

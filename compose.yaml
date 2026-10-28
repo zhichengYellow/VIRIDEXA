@@ -10,11 +10,11 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Run scripts/dev-env.sh first}
       MYSQL_DATABASE: nonfood_oil_plants
-    command: ["mysqld", "--innodb-buffer-pool-size=128M"]
+    command: ["mysqld", "--innodb-buffer-pool-size=${MYSQL_BUFFER_POOL_SIZE:-512M}"]
     tmpfs:
       - /var/lib/mysql:rw,size=1g,mode=1777
     volumes:
-      - ${VIRIDEXA_DATA_DIR:-../VIRIDEXA-protected/data}/backups/viridexa-live-snapshot-20261024.sql.gz:/docker-entrypoint-initdb.d/90-source-snapshot.sql.gz:ro
+      - ${VIRIDEXA_DATA_DIR:-./data}/backups/viridexa-live-snapshot-20261024.sql.gz:/docker-entrypoint-initdb.d/90-source-snapshot.sql.gz:ro
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD}"]
       interval: 5s
@@ -32,7 +32,7 @@ services:
       MYSQL_APP_PASSWORD: ${MYSQL_APP_PASSWORD:?Run scripts/dev-env.sh first}
       MYSQL_MIGRATOR_PASSWORD: ${MYSQL_MIGRATOR_PASSWORD:?Run scripts/dev-env.sh first}
       MYSQL_IMPORTER_PASSWORD: ${MYSQL_IMPORTER_PASSWORD:?Run scripts/dev-env.sh first}
-    command: ["mysqld", "--innodb-buffer-pool-size=128M", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci"]
+    command: ["mysqld", "--innodb-buffer-pool-size=${MYSQL_BUFFER_POOL_SIZE:-512M}", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci"]
     ports:
       - "127.0.0.1:3309:3306"
     volumes:
@@ -54,14 +54,43 @@ services:
       db:
         condition: service_healthy
     environment:
-      DB_URL: jdbc:mysql://db:3306/viridexa?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+      TURNSTILE_ENABLED: ${TURNSTILE_ENABLED:-false}
+      TURNSTILE_MODE: ${TURNSTILE_MODE:-production}
+      TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY:-}
+      TURNSTILE_SECRET: ${TURNSTILE_SECRET:-}
+      TURNSTILE_HOSTNAMES: ${TURNSTILE_HOSTNAMES:-}
+      TRUSTED_PROXY_CIDRS: ${TRUSTED_PROXY_CIDRS:-}
+      API_DOCS_ENABLED: ${API_DOCS_ENABLED:-true}
+      AGENT_MODEL_ENABLED: ${AGENT_MODEL_ENABLED:-false}
+      AGENT_API_KEY: ${AGENT_API_KEY:-}
+      AGENT_BASE_URL: ${AGENT_BASE_URL:-https://api.openai.com/v1}
+      AGENT_MODEL: ${AGENT_MODEL:-}
+      AGENT_RUNTIME_DIRECTORY: /agent-runtime
+      AGENT_USER_DAILY_REQUESTS: ${AGENT_USER_DAILY_REQUESTS:-20}
+      AGENT_GLOBAL_DAILY_REQUESTS: ${AGENT_GLOBAL_DAILY_REQUESTS:-200}
+      AGENT_USER_DAILY_TOKENS: ${AGENT_USER_DAILY_TOKENS:-30000}
+      AGENT_GLOBAL_DAILY_TOKENS: ${AGENT_GLOBAL_DAILY_TOKENS:-300000}
+      AGENT_USER_DAILY_COST: ${AGENT_USER_DAILY_COST:-}
+      AGENT_GLOBAL_DAILY_COST: ${AGENT_GLOBAL_DAILY_COST:-}
+      AGENT_INPUT_COST_PER_MILLION: ${AGENT_INPUT_COST_PER_MILLION:-}
+      AGENT_OUTPUT_COST_PER_MILLION: ${AGENT_OUTPUT_COST_PER_MILLION:-}
+      DB_URL: jdbc:mysql://db:3306/viridexa?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       DB_USERNAME: viridexa_ro
       DB_PASSWORD: ${MYSQL_APP_PASSWORD:?Run scripts/dev-env.sh first}
+      VIRIDEXA_PROTECTED_ROOT: /science-inputs
+      DB_ACCOUNT_USERNAME: viridexa_accounts
+      DB_ACCOUNT_PASSWORD: ${MYSQL_ACCOUNT_PASSWORD:-}
+      DB_REVIEW_USERNAME: viridexa_reviewer
+      DB_REVIEW_PASSWORD: ${MYSQL_REVIEW_PASSWORD:-}
       DB_MIGRATION_USERNAME: viridexa_migrator
       DB_MIGRATION_PASSWORD: ${MYSQL_MIGRATOR_PASSWORD:?Run scripts/dev-env.sh first}
       FLYWAY_ENABLED: "true"
       WEB_ORIGIN: http://localhost:5173
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
       SERVER_PORT: 8080
+    volumes:
+      - ${VIRIDEXA_DATA_DIR:-./data}:/science-inputs/data:ro
+      - viridexa_agent_runtime:/agent-runtime
     ports:
       - "127.0.0.1:18080:8080"
     healthcheck:
@@ -77,13 +106,27 @@ services:
     depends_on:
       api:
         condition: service_healthy
+    environment:
+      NGINX_ENVSUBST_FILTER: '^VIRIDEXA_NGINX_'
+      VIRIDEXA_NGINX_LISTEN: ${VIRIDEXA_NGINX_LISTEN:-80}
+      VIRIDEXA_NGINX_OBSERVE: ${VIRIDEXA_NGINX_OBSERVE:-off}
+      VIRIDEXA_NGINX_RATE_API: ${VIRIDEXA_NGINX_RATE_API:-20r/s}
+      VIRIDEXA_NGINX_RATE_SEARCH: ${VIRIDEXA_NGINX_RATE_SEARCH:-8r/s}
+      VIRIDEXA_NGINX_RATE_AUTH: ${VIRIDEXA_NGINX_RATE_AUTH:-10r/m}
+      VIRIDEXA_NGINX_RATE_AGENT: ${VIRIDEXA_NGINX_RATE_AGENT:-2r/s}
+      VIRIDEXA_NGINX_RATE_ADMIN: ${VIRIDEXA_NGINX_RATE_ADMIN:-10r/m}
     volumes:
       - ./apps/web/dist:/usr/share/nginx/html:ro
-      - ./infra/nginx/web.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./data/media/public:/media-public:ro
+      - ./infra/nginx/web.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ./infra/nginx/proxy-common.conf:/etc/nginx/proxy-common.conf:ro
+      - ./infra/nginx/security-headers.conf:/etc/nginx/security-headers.conf:ro
+      - ./infra/security/nginx-trusted-proxies.conf:/etc/nginx/trusted-proxies.conf:ro
     ports:
       - "127.0.0.1:5173:80"
 
 volumes:
   # Only the rebuildable VIRIDEXA target database lives in Docker volume storage.
-  # Protected scientific files are outside this repository and are never a Docker volume.
+  # Project-local data/ is bind-mounted read-only; it is never a named Docker volume.
   viridexa_mysql_v1:
+  viridexa_agent_runtime:

@@ -2,7 +2,7 @@ spring:
   application:
     name: viridexa-api
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3309/viridexa?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai}
+    url: ${DB_URL:jdbc:mysql://localhost:3309/viridexa?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
     username: ${DB_USERNAME:viridexa_ro}
     password: ${DB_PASSWORD:}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -10,6 +10,14 @@ spring:
       read-only: true
       maximum-pool-size: 6
       pool-name: viridexa-readonly-pool
+      connection-timeout: 5000
+      validation-timeout: 2000
+  jdbc:
+    template:
+      query-timeout: 5s
+  servlet:
+    multipart:
+      enabled: false
   flyway:
     enabled: ${FLYWAY_ENABLED:true}
     user: ${DB_MIGRATION_USERNAME:viridexa_migrator}
@@ -26,25 +34,80 @@ mybatis:
     default-statement-timeout: 5
 
 server:
+  forward-headers-strategy: none
+  max-http-request-header-size: 16KB
+  tomcat:
+    max-connections: 120
+    accept-count: 32
+    connection-timeout: 5s
+    threads:
+      max: 40
+      min-spare: 4
   port: ${SERVER_PORT:8080}
+  servlet:
+    session:
+      timeout: 20m
+      cookie:
+        http-only: true
+        same-site: strict
+        secure: ${SESSION_COOKIE_SECURE:false}
   error:
     include-message: never
 
 viridexa:
+  security:
+    trusted-proxy-cidrs: ${TRUSTED_PROXY_CIDRS:}
+  turnstile:
+    enabled: ${TURNSTILE_ENABLED:false}
+    mode: ${TURNSTILE_MODE:production}
+    site-key: ${TURNSTILE_SITE_KEY:}
+    secret: ${TURNSTILE_SECRET:}
+    hostnames: ${TURNSTILE_HOSTNAMES:}
+    timeout-seconds: ${TURNSTILE_TIMEOUT_SECONDS:4}
+  agent:
+    enabled: ${AGENT_MODEL_ENABLED:false}
+    api-key: ${AGENT_API_KEY:}
+    base-url: ${AGENT_BASE_URL:https://api.openai.com/v1}
+    model: ${AGENT_MODEL:}
+    runtime-directory: ${AGENT_RUNTIME_DIRECTORY:.runtime/agent}
+    max-model-calls: ${AGENT_MAX_MODEL_CALLS:3}
+    max-tool-calls: ${AGENT_MAX_TOOL_CALLS:6}
+    max-concurrent: ${AGENT_MAX_CONCURRENT:2}
+    total-timeout-seconds: ${AGENT_TOTAL_TIMEOUT_SECONDS:30}
+    tool-timeout-seconds: ${AGENT_TOOL_TIMEOUT_SECONDS:5}
+    model-timeout-seconds: ${AGENT_MODEL_TIMEOUT_SECONDS:12}
+    user-daily-requests: ${AGENT_USER_DAILY_REQUESTS:20}
+    global-daily-requests: ${AGENT_GLOBAL_DAILY_REQUESTS:200}
+    user-daily-tokens: ${AGENT_USER_DAILY_TOKENS:30000}
+    global-daily-tokens: ${AGENT_GLOBAL_DAILY_TOKENS:300000}
+    max-output-tokens: ${AGENT_MAX_OUTPUT_TOKENS:1200}
+    user-daily-cost: ${AGENT_USER_DAILY_COST:}
+    global-daily-cost: ${AGENT_GLOBAL_DAILY_COST:}
+    input-cost-per-million: ${AGENT_INPUT_COST_PER_MILLION:}
+    output-cost-per-million: ${AGENT_OUTPUT_COST_PER_MILLION:}
+  protected-root: ${VIRIDEXA_PROTECTED_ROOT:}
+  accounts:
+    username: ${DB_ACCOUNT_USERNAME:viridexa_accounts}
+    password: ${DB_ACCOUNT_PASSWORD:}
+  review:
+    username: ${DB_REVIEW_USERNAME:viridexa_reviewer}
+    password: ${DB_REVIEW_PASSWORD:}
   cors:
     allowed-origin: ${WEB_ORIGIN:http://localhost:5173}
 
 springdoc:
   api-docs:
+    enabled: ${API_DOCS_ENABLED:true}
     path: /api-docs
   swagger-ui:
+    enabled: ${API_DOCS_ENABLED:true}
     path: /docs
 
 management:
   endpoints:
     web:
       exposure:
-        include: health
+        include: health,metrics
   endpoint:
     health:
       probes:

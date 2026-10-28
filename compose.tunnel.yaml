@@ -1,0 +1,35 @@
+# Optional Cloudflare Tunnel transport. Start with compose.production.yaml and
+# this file together; the tunnel joins only the web edge network.
+services:
+  web:
+    volumes:
+      - ./infra/security/nginx-tunnel-trusted-proxies.conf:/etc/nginx/trusted-proxies.conf:ro
+  cloudflared:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    image: cloudflare/cloudflared:2026.10.3
+    restart: unless-stopped
+    command: ["tunnel", "--no-autoupdate", "run"]
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?Set tunnel token through the host environment}
+    depends_on:
+      web:
+        condition: service_started
+    networks:
+      edge:
+        ipv4_address: 172.31.0.2
+    mem_limit: 128m
+    cpus: 0.25
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+networks:
+  edge:
+    ipam:
+      config:
+        - subnet: 172.31.0.0/24

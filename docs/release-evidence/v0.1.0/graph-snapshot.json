@@ -1,0 +1,40 @@
+{
+  "mode": "APPLY",
+  "scope": "PUBLIC",
+  "sourceFingerprint": "6c9ff337ba6b39b688b9f793a339d2656e0c2f9243f6b9691201ac9ab469d91c",
+  "nodeCounts": {
+    "SOURCE": 18,
+    "FILE": 18,
+    "PLANT": 60028,
+    "TAXON": 60040,
+    "NAME": 83814,
+    "SAMPLE": 7067,
+    "TRAIT": 392781,
+    "MEASUREMENT": 10435,
+    "MORPHOLOGY": 82991,
+    "TAXONOMY": 1372
+  },
+  "edgeCounts": {
+    "SOURCE_FILE": 18,
+    "IDENTITY_REFERENCE": 60028,
+    "PARENT_TAXON": 123,
+    "HAS_NAME": 83814,
+    "SOURCED_FROM": 161905,
+    "HAS_MEASUREMENT": 10435,
+    "HAS_TRAIT": 392781,
+    "SUPPORTED_BY": 2035,
+    "ACCEPTED_TAXON": 536,
+    "SOURCE_NAME_RECORD": 83735
+  },
+  "totalNodes": 698564,
+  "totalEdges": 795410,
+  "validation": {
+    "rules": "graph-read-model-v22",
+    "boundedTraitSqlRecords": 120,
+    "boundedTraitSqlCount": 532,
+    "fullTraitProjectionCount": 392781,
+    "rawScientificRowsCopied": false,
+    "humanReviewCreated": false
+  },
+  "notice": "Dated aggregate release snapshot; node/edge queries independently enforce current visibility."
+}

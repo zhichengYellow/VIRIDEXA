@@ -1,0 +1,87 @@
+{
+  "chineseSearch": {
+    "samples": 6,
+    "p50Ms": 2145.6949999999997,
+    "maxMs": 2653.89,
+    "p95NearestRankMs": 2653.89,
+    "rawMs": [
+      2653.89,
+      2093.17,
+      2103.42,
+      2172.25,
+      2515.42,
+      2119.14
+    ]
+  },
+  "latinSearch": {
+    "samples": 6,
+    "p50Ms": 2144.895,
+    "maxMs": 2467.45,
+    "p95NearestRankMs": 2467.45,
+    "rawMs": [
+      2327.64,
+      2063.79,
+      2467.45,
+      2113.46,
+      2158.98,
+      2130.81
+    ]
+  },
+  "plantDetail": {
+    "samples": 6,
+    "p50Ms": 235.26999999999998,
+    "maxMs": 242.99,
+    "p95NearestRankMs": 242.99,
+    "rawMs": [
+      242.48,
+      237.53,
+      242.99,
+      233.01,
+      223.02,
+      210.06
+    ]
+  },
+  "nameEvidence": {
+    "samples": 6,
+    "p50Ms": 307.08500000000004,
+    "maxMs": 396.71,
+    "p95NearestRankMs": 396.71,
+    "rawMs": [
+      396.71,
+      290.04,
+      303.41,
+      289.47,
+      310.76,
+      343.3
+    ]
+  },
+  "media": {
+    "samples": 6,
+    "p50Ms": 250.87,
+    "maxMs": 459.38,
+    "p95NearestRankMs": 459.38,
+    "rawMs": [
+      226.85,
+      235.25,
+      292.86,
+      459.38,
+      266.49,
+      231.26
+    ]
+  },
+  "graph": {
+    "samples": 6,
+    "p50Ms": 3947.755,
+    "maxMs": 5676.38,
+    "p95NearestRankMs": 5676.38,
+    "rawMs": [
+      3790.15,
+      4159.73,
+      3532.76,
+      3700.08,
+      5676.38,
+      4105.36
+    ]
+  },
+  "scope": "Local sequential concurrency=1, six observations per endpoint, not a production SLA or stable tail-latency estimate"
+}

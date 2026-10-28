@@ -18,5 +18,6 @@ export interface PlantRecord {
 export interface PlantSearchResult {
   query: string | null
   total: number
+  nextAfterId?: number
   items: PlantRecord[]
 }

@@ -2,7 +2,7 @@
 
 ## Input boundary
 
-`VIRIDEXA_DATA_DIR` points to an external, read-only source tree (default `../VIRIDEXA-protected/data`). It contains original files, extracted results, screenshots, page renders, image mappings, and the checksum-verified SQL snapshot. The application runtime does not mount this tree. The previous SQL schema archive is kept alongside it and is not an application database.
+Research inputs are managed inside this project at `data/` (`VIRIDEXA_DATA_DIR=./data`). Original archives remain read-only inputs; extracted results, image mappings and derived outputs retain their existing categories. Historical SQL archives are stored in `data/backups/legacy-database/` and must never be executed as current Flyway migrations. Compose mounts only `./data` read-only at `/science-inputs/data`, retaining the stored `data/...` source locators without mounting the repository or its secrets. Original documents remain subject to existing authorization and licensing controls. The external sibling backup is retained until a human decides it is no longer needed. The entire data tree is ignored by Git; ignored files are NOT protected from `git clean`, which must not be used on this tree.
 
 Every discovered input can be catalogued as a `source_asset` with logical path, byte size, media type, and SHA-256. An extractor then creates source-specific evidence locators and normalized records. Processed outputs go to `VIRIDEXA_DATA_DIR/processed/pipeline-runs/<run-id>/`; they are rebuildable and excluded from Git and the original asset inventory.
 
@@ -32,7 +32,7 @@ python3 scripts/pipeline/import_snapshot_records.py --dry-run
 python3 scripts/pipeline/import_snapshot_records.py --apply
 ```
 
-Dry-run is the default. The course extractor validates hashes and extracted content without a database connection. The snapshot extractor starts an isolated, temporary restore from the protected snapshot and uses SELECT statements only. Both write `report.json` and prepared SQL under the external `processed/` directory. `--apply` is explicit and writes only to the local Compose `viridexa` database using an insert-only account. Neither extractor connects to the old live service or writes to a source file.
+Dry-run is the default. The course extractor validates hashes and extracted content without a database connection. The snapshot extractor starts an isolated, temporary restore from the protected snapshot and uses SELECT statements only. Both write `report.json` and prepared SQL under the `data/processed/` directory. `--apply` is explicit and writes only to the local Compose `viridexa` database using an insert-only account. Neither extractor connects to the old live service or writes to a source file.
 
 Re-running an identical input is idempotent through deterministic content/source keys. A changed source file has a changed checksum and is a new version. Each report records input hashes, counts, link outcomes, missing-value handling, and the prepared/applied status. Compare counts and investigate exceptions before any release or review approval.
 

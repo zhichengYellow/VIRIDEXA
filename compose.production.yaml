@@ -1,0 +1,80 @@
+services:
+  db:
+    # Dedicated VIRIDEXA instance only: keep temporary RAM and connection count
+    # within this service's 1GiB cgroup instead of MySQL's 1GiB temp-table default.
+    command: ["mysqld", "--innodb-buffer-pool-size=${MYSQL_BUFFER_POOL_SIZE:-512M}", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci", "--max-connections=40", "--temptable-max-ram=64M", "--temptable-max-mmap=128M"]
+    logging: &bounded_logs
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    ports: !reset []
+    networks:
+      - database
+    mem_limit: 1g
+    cpus: 1.0
+    security_opt:
+      - no-new-privileges:true
+
+  api:
+    logging: *bounded_logs
+    read_only: true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m,mode=1777
+    ports: !reset []
+    environment:
+      WEB_ORIGIN: ${WEB_ORIGIN:?Set the public HTTPS origin}
+      SESSION_COOKIE_SECURE: "true"
+      TURNSTILE_ENABLED: "true"
+      TURNSTILE_MODE: production
+      TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY:?Set the production Turnstile site key}
+      TURNSTILE_SECRET: ${TURNSTILE_SECRET:?Set the production Turnstile secret}
+      TURNSTILE_HOSTNAMES: ${TURNSTILE_HOSTNAMES:?Set comma-separated exact hostnames}
+      TRUSTED_PROXY_CIDRS: 172.30.0.10/32
+      API_DOCS_ENABLED: "false"
+    networks:
+      - database
+      - web_api
+      - api_egress
+    mem_limit: 1g
+    cpus: 1.0
+    security_opt:
+      - no-new-privileges:true
+
+  web:
+    logging: *bounded_logs
+    user: "101:101"
+    environment:
+      VIRIDEXA_NGINX_LISTEN: "8080"
+    ports: !reset []
+    volumes:
+      - ./infra/security/nginx-trusted-proxies.conf:/etc/nginx/trusted-proxies.conf:ro
+    networks:
+      web_api:
+        ipv4_address: 172.30.0.10
+      edge: {}
+    mem_limit: 256m
+    cpus: 0.5
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /etc/nginx/conf.d:rw,noexec,nosuid,size=1m,uid=101,gid=101,mode=0755
+      - /var/cache/nginx:rw,noexec,nosuid,size=16m,uid=101,gid=101,mode=0750
+      - /var/run:rw,noexec,nosuid,size=1m,uid=101,gid=101,mode=0750
+
+networks:
+  database:
+    internal: true
+  web_api:
+    internal: true
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+  edge: {}
+  api_egress:
+    driver: bridge

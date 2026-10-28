@@ -15,19 +15,19 @@ public interface ScientificMapper {
     List<Map<String,Object>> facts(@Param("pipeline") String pipeline, @Param("limit") int limit);
 
     @Select("""
-        SELECT f.id, f.locator, f.raw_payload, f.normalized_payload, f.content_sha256,
-               s.dataset, s.version_label, s.path, s.sha256, s.license_state,
-               s.integrity_state, d.reviewer_id, d.rationale, d.decided_at
-        FROM published_scientific_fact f
+        SELECT f.id, f.locator, f.normalized_payload, f.content_sha256, f.knowledge_confidence, f.visibility,
+               SUBSTRING_INDEX(s.dataset,'/',-1) AS dataset, s.version_label, SUBSTRING_INDEX(s.path,'/',-1) AS source_document, s.sha256, s.license_state,
+               s.integrity_state, d.id AS decision_id, d.action, d.decided_at
+        FROM public_source_record f
         JOIN scientific_source_version s ON s.id=f.source_id
-        JOIN scientific_decision d ON d.id=f.decision_id
+        LEFT JOIN scientific_decision d ON d.id=f.decision_id
         WHERE f.id=#{id}
         """)
     List<Map<String,Object>> lineage(@Param("id") String id);
 
     @Select("""
-        SELECT id, pipeline, normalized_payload AS payload, source_id, locator, decision_id
-        FROM published_scientific_fact
+        SELECT id, pipeline, normalized_payload AS payload, source_id, locator, decision_id, knowledge_confidence
+        FROM public_source_record
         WHERE pipeline IN ('TAXONOMY','MORPHOLOGY')
           AND (#{q} IS NULL OR JSON_SEARCH(normalized_payload, 'all', CONCAT('%', #{q}, '%')) IS NOT NULL)
         ORDER BY pipeline, id LIMIT #{limit}
@@ -41,10 +41,10 @@ public interface ScientificMapper {
     List<Map<String,Object>> coverage();
 
     @Select("""
-        SELECT s.id AS source_id, s.dataset, s.version_label, s.path AS source_path,
+        SELECT s.id AS source_id, SUBSTRING_INDEX(s.dataset,'/',-1) AS dataset, s.version_label, SUBSTRING_INDEX(s.path,'/',-1) AS source_document,
                f.id AS fact_id, f.pipeline, f.locator, f.normalized_payload AS payload,
                f.decision_id
-        FROM published_scientific_fact f JOIN scientific_source_version s ON s.id=f.source_id
+        FROM public_source_record f JOIN scientific_source_version s ON s.id=f.source_id
         WHERE f.id=#{id}
         """)
     List<Map<String,Object>> sourceChain(@Param("id") String id);
@@ -52,10 +52,10 @@ public interface ScientificMapper {
     @Select("""
         SELECT o.sample_id, sm.study_key AS study_id, o.kind AS measurement_kind,
                o.analyte, o.raw_value, o.value_numeric, o.unit, o.basis,
-               o.candidate_id AS evidence_id, o.source_id
+               o.candidate_id AS evidence_id, o.source_id, f.knowledge_confidence
         FROM scientific_lipid_observation o
         JOIN scientific_sample sm ON sm.id=o.sample_id
-        JOIN published_scientific_fact f ON f.id=o.candidate_id
+        JOIN public_source_record f ON f.id=o.candidate_id
         WHERE (#{kind} IS NULL OR o.kind=#{kind})
           AND (#{sampleId} IS NULL OR o.sample_id=#{sampleId})
           AND (#{basis} IS NULL OR o.basis=#{basis})
@@ -66,30 +66,37 @@ public interface ScientificMapper {
             @Param("basis") String basis, @Param("sourceId") String sourceId, @Param("limit") int limit);
 
     @Select("""
-        SELECT id,pipeline,normalized_payload,source_id,locator,decision_id
-        FROM published_scientific_fact WHERE pipeline='MORPHOLOGY'
-        AND (#{leafShape} IS NULL OR JSON_UNQUOTE(JSON_EXTRACT(normalized_payload,'$.traits."leaf shape"')) LIKE CONCAT('%',#{leafShape},'%'))
-        AND (#{leafMargin} IS NULL OR JSON_UNQUOTE(JSON_EXTRACT(normalized_payload,'$.traits."leaf margin"')) LIKE CONCAT('%',#{leafMargin},'%'))
-        AND (#{flowerColour} IS NULL OR JSON_UNQUOTE(JSON_EXTRACT(normalized_payload,'$.traits."flower colour"')) LIKE CONCAT('%',#{flowerColour},'%'))
-        AND (#{growthForm} IS NULL OR JSON_UNQUOTE(JSON_EXTRACT(normalized_payload,'$.traits."habit"')) LIKE CONCAT('%',#{growthForm},'%'))
-        AND (#{fruitType} IS NULL OR JSON_UNQUOTE(JSON_EXTRACT(normalized_payload,'$.traits."fruit type"')) LIKE CONCAT('%',#{fruitType},'%'))
-        ORDER BY id LIMIT 100
+        SELECT f.id,f.pipeline,f.normalized_payload,f.source_id,f.locator,f.decision_id,f.knowledge_confidence
+        FROM public_source_record f JOIN ontology_projection o ON o.candidate_id=f.id WHERE f.pipeline='MORPHOLOGY'
+        AND (#{leafShape} IS NULL OR JSON_CONTAINS(JSON_EXTRACT(o.projection,'$.traits.leaf_shape'),JSON_OBJECT('concept',#{leafShape})))
+        AND (#{leafMargin} IS NULL OR JSON_CONTAINS(JSON_EXTRACT(o.projection,'$.traits.leaf_margin'),JSON_OBJECT('concept',#{leafMargin})))
+        AND (#{flowerColour} IS NULL OR JSON_CONTAINS(JSON_EXTRACT(o.projection,'$.traits.flower_colour'),JSON_OBJECT('concept',#{flowerColour})))
+        AND (#{growthForm} IS NULL OR JSON_CONTAINS(JSON_EXTRACT(o.projection,'$.traits.growth_form'),JSON_OBJECT('concept',#{growthForm})))
+        AND (#{fruitType} IS NULL OR JSON_CONTAINS(JSON_EXTRACT(o.projection,'$.traits.fruit_type'),JSON_OBJECT('concept',#{fruitType})))
+        ORDER BY f.id LIMIT 100
         """)
     List<Map<String,Object>> morphology(@Param("leafShape") String leafShape,@Param("leafMargin") String leafMargin,
         @Param("flowerColour") String flowerColour,@Param("growthForm") String growthForm,@Param("fruitType") String fruitType);
 
     @Select("""
         SELECT l.candidate_id AS from_id,l.document_source_id AS to_id,l.relation,l.id AS evidence_id
-        FROM scientific_evidence_link l JOIN published_scientific_fact f ON f.id=l.candidate_id
+        FROM scientific_evidence_link l JOIN public_source_record f ON f.id=l.candidate_id
         ORDER BY l.id LIMIT 100
         """)
     List<Map<String,Object>> relationships();
 
     @Select("""
-        SELECT l.id AS evidence_id,l.locator,l.relation,s.id AS source_id,s.path,s.sha256,s.version_label,s.license_state,s.integrity_state
+        SELECT l.id AS evidence_id,l.locator,l.relation,s.id AS source_id,SUBSTRING_INDEX(s.path,'/',-1) AS source_document,s.sha256,s.version_label,s.license_state,s.integrity_state
         FROM scientific_evidence_link l JOIN scientific_source_version s ON s.id=l.document_source_id
-        JOIN published_scientific_fact f ON f.id=l.candidate_id WHERE f.id=#{id}
+        JOIN public_source_record f ON f.id=l.candidate_id WHERE f.id=#{id}
         ORDER BY l.id
         """)
     List<Map<String,Object>> documents(@Param("id") String id);
+
+    @Select("""
+      SELECT f.id,f.normalized_payload,o.projection,f.knowledge_confidence
+      FROM public_source_record f JOIN ontology_projection o ON o.candidate_id=f.id
+      WHERE f.pipeline='MORPHOLOGY' ORDER BY f.id LIMIT 1001
+      """)
+    List<Map<String,Object>> identificationRecords();
 }

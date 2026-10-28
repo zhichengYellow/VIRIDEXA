@@ -2,7 +2,7 @@
 """Deterministically stage the course-PDF extraction into the VIRIDEXA v1 model.
 
 The default mode is a dry run. Raw inputs are read only. Reports and generated SQL are
-written under the external protected data directory's processed/ folder.
+written under the project-local protected data directory's processed/ folder.
 """
 
 from __future__ import annotations
@@ -43,7 +43,7 @@ def data_root() -> Path:
                 value = line.split("=", 1)[1].strip()
                 path = Path(value)
                 return (ROOT / path).resolve() if not path.is_absolute() else path.resolve()
-    return (ROOT.parent / "VIRIDEXA-protected" / "data").resolve()
+    return (ROOT / "data").resolve()
 
 
 def sha256(data: bytes) -> str:
@@ -178,7 +178,7 @@ def main() -> int:
         if not path.is_file():
             continue
         relative = path.relative_to(data).as_posix()
-        if relative.startswith(("processed/", "migration/")) or path.name == ".DS_Store":
+        if relative.startswith(("processed/", "migration/", "backups/managed/", "backups/legacy-database/")) or path.name == ".DS_Store":
             continue
         digest = file_hash(path)
         key = stable_key("asset", relative, digest)
