@@ -23,6 +23,11 @@ services:
       start_period: 25s
 
   db:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     image: mysql:8.0.44
     container_name: viridexa-db-v1
     restart: unless-stopped
@@ -46,6 +51,11 @@ services:
       start_period: 25s
 
   api:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     tmpfs:
       - /tmp:rw,nosuid,size=64m,mode=1777
     build:
@@ -103,6 +113,11 @@ services:
       start_period: 35s
 
   web:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     image: nginx:1.27-alpine
     restart: unless-stopped
     depends_on:

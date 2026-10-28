@@ -1,0 +1,5 @@
+import {test} from 'node:test'
+import assert from 'node:assert/strict'
+import {sourceProfiles,sourceProfile} from '../../technology/sources.ts'
+test('source cards distinguish actual file families and scope',()=>{assert.equal(sourceProfile('data/raw/nhm_traits/efloras.flora_of_china.zip')?.id,'foc');assert.equal(sourceProfile('combined.zip')?.id,'nhm');assert.equal(sourceProfile('COL2022.xlsx')?.id,'sp2000');assert.equal(sourceProfile('FoodData_Central.csv')?.id,'usda');assert.equal(sourceProfile('unknown-source') ,null)})
+test('each source has usage and interpretation boundaries and identifiers are unique',()=>{assert.equal(new Set(sourceProfiles.map(p=>p.id)).size,sourceProfiles.length);for(const p of sourceProfiles){assert.ok(p.description&&p.usage&&p.boundary);if(p.url)assert.match(p.url,/^https?:\/\//)}assert.match(sourceProfiles.find(p=>p.id==='sp2000')!.usage,/2022/);assert.match(sourceProfiles.find(p=>p.id==='usda')!.boundary,/不能/);assert.match(sourceProfiles.find(p=>p.id==='wfo')!.usage,/不等同/)} )

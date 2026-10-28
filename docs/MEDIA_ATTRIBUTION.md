@@ -45,3 +45,15 @@ python3 scripts/pipeline/audit_botanical_completeness.py
 ```
 
 The importer verifies original bytes, derivatives, catalogue identity, path shape and per-image licence. Existing raw files and derivatives are not overwritten. Duplicate import does not replace media rows. No R2/OSS adapter is implemented; local persistence works without any cloud credentials. Reuse of application code grants no rights over independently licensed data or media. No project source-code licence has been selected.
+
+
+## Author-provided WeChat images (2026-10-28)
+
+The project author explicitly requested display of the two images supplied in `data/images/wechat/` on `/technology`. Only these selected images are copied to `apps/web/public/support/`; the raw data directory is not publicly mounted.
+
+| Public asset | Purpose | Display caption | Bytes |
+| --- | --- | --- | --- |
+| `wechat-friend.png` | Author contact QR | 需要技术帮助可添加 | 233130 |
+| `wechat-support.png` | Voluntary support QR | 感谢老板赏识 | 166971 |
+
+Both public PNG copies match the supplied originals byte for byte (SHA-256 equality checked). Images are displayed without cropping or lossy recompression, load lazily when expanded, and link to their original-sized public copy. These are author contact/support materials, not botanical source records; authorization for this project display does not grant third parties a general redistribution licence. No payment is initiated by the application.
