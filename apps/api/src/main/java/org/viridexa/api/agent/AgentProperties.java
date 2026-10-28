@@ -10,8 +10,9 @@ import org.springframework.stereotype.Component;
 public class AgentProperties {
     private boolean enabled;
     private String apiKey = "";
-    private String baseUrl = "https://api.openai.com/v1";
-    private String model = "";
+    private String baseUrl = "https://openrouter.ai/api/v1";
+    private String model = "openrouter/free";
+    private String freeModelAllowlist = "openrouter/free";
     private int maxModelCalls = 3, maxToolCalls = 6, maxConcurrent = 2;
     private int totalTimeoutSeconds = 30, toolTimeoutSeconds = 5, modelTimeoutSeconds = 12;
     private int userDailyRequests = 20, globalDailyRequests = 200;
@@ -46,6 +47,7 @@ public class AgentProperties {
     private static void range(int n,int min,int max,String name){if(n<min||n>max)throw new IllegalArgumentException("invalid agent "+name);}
     private static void positive(long n,String name){if(n<1)throw new IllegalArgumentException("invalid agent "+name);}
 
+    public String getFreeModelAllowlist(){return freeModelAllowlist;} public void setFreeModelAllowlist(String v){freeModelAllowlist=v;}
     public boolean isEnabled(){return enabled;} public void setEnabled(boolean v){enabled=v;}
     public String getApiKey(){return apiKey;} public void setApiKey(String v){apiKey=v;}
     public String getBaseUrl(){return baseUrl;} public void setBaseUrl(String v){baseUrl=v;}

@@ -1,0 +1,82 @@
+{
+  "date": "2026-10-28",
+  "environment": "isolated schema; cloned real public records; technical fixture account; no scientific approval",
+  "totalActualHttpAttempts": 3,
+  "rejectedHttp404": 1,
+  "successfulModelResponses": 2,
+  "usage": {
+    "modelCalls": 2,
+    "toolCalls": 4,
+    "inputTokens": 3019,
+    "outputTokens": 1539,
+    "tokenUsageComplete": true,
+    "actualModels": [
+      "nvidia/nemotron-3.5-super-vl:free",
+      "dots-studio/dots-3-note-preview:free"
+    ],
+    "actualCost": "0"
+  },
+  "elapsedMs": 16205,
+  "trace": [
+    {
+      "sequence": 1,
+      "tool": "searchPlants",
+      "status": "SUCCESS",
+      "elapsedMs": 18,
+      "resultCount": 1,
+      "recordIds": [
+        "plant:24867"
+      ],
+      "message": "找到公开证据",
+      "arguments": {
+        "limit": 5
+      }
+    },
+    {
+      "sequence": 2,
+      "tool": "getPlantProfile",
+      "status": "SUCCESS",
+      "elapsedMs": 6,
+      "resultCount": 1,
+      "recordIds": [
+        "plant:24867"
+      ],
+      "message": "找到公开证据",
+      "arguments": {
+        "plantId": 24867
+      }
+    },
+    {
+      "sequence": 3,
+      "tool": "getEvidenceLineage",
+      "status": "TOOL_FAILED",
+      "elapsedMs": 5,
+      "resultCount": 0,
+      "recordIds": [],
+      "message": "领域服务查询失败。",
+      "arguments": {
+        "recordId": "24867"
+      }
+    },
+    {
+      "sequence": 4,
+      "tool": "getResearchSamples",
+      "status": "INSUFFICIENT_EVIDENCE",
+      "elapsedMs": 44,
+      "resultCount": 0,
+      "recordIds": [],
+      "message": "没有找到公开证据",
+      "arguments": {
+        "plantId": 24867,
+        "limit": 10
+      }
+    }
+  ],
+  "citationAccessChecks": [
+    {
+      "id": "plant:24867",
+      "accessible": true
+    }
+  ],
+  "note": "The rejected 404 response has no reported cost/token usage. Both successful responses report cost=0. No paid fallback or billing API was used."
+}

@@ -21,7 +21,7 @@ services:
     read_only: true
     cap_drop:
       - ALL
-    tmpfs:
+    tmpfs: !override
       - /tmp:rw,noexec,nosuid,size=64m,mode=1777
     ports: !reset []
     environment:

@@ -35,6 +35,15 @@ public interface ScientificMapper {
     List<Map<String,Object>> plantSearch(@Param("q") String q, @Param("limit") int limit);
 
     @Select("""
+        SELECT f.id,f.pipeline,f.normalized_payload AS payload,f.source_id,f.locator,f.decision_id,f.knowledge_confidence
+        FROM public_source_record f
+        WHERE f.pipeline='MORPHOLOGY'
+        AND JSON_CONTAINS(JSON_EXTRACT(f.normalized_payload,'$.normalized_traits.leaf_shape'),JSON_QUOTE(#{term}))
+        ORDER BY f.id LIMIT #{limit}
+        """)
+    List<Map<String,Object>> leafSourceRecords(@Param("term") String term,@Param("limit") int limit);
+
+    @Select("""
         SELECT pipeline, COUNT(*) AS fact_count, COUNT(DISTINCT source_id) AS source_count
         FROM published_scientific_fact GROUP BY pipeline ORDER BY pipeline
         """)

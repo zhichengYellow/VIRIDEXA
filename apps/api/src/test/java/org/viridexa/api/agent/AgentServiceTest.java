@@ -46,4 +46,36 @@ class AgentServiceTest {
 
  @Test void filterOnlyWorkbenchContextStillQueriesRealPublicMeasurements()throws Exception{create();var v=finished(service.start("owner","ip:filters","当前含油率资料",Map.of("kind","OIL_CONTENT")).id());verify(tools).execute("getResearchSamples",Map.of("kind","OIL_CONTENT","limit",5));assertEquals("INSUFFICIENT_SCIENTIFIC_EVIDENCE",v.answer().status());assertEquals(1,v.usage().toolCalls());}
 
+ @Test void deterministicIntroductionUsesNoRemoteModelEvenWhenConfigured()throws Exception{
+  when(model.configured()).thenReturn(true);create();var result=finished(service.start("owner","user:a","介绍银杏。").id());
+  assertEquals(0,result.usage().modelCalls());assertEquals("SEARCH_FALLBACK",result.mode());verify(model,never()).complete(anyList(),anyList(),any());verify(tools).execute("searchPlants",Map.of("query","银杏","limit",5));
+ }
+ @Test void followupsRetainOnlyServerOwnedPublicPlantContextAndRequery()throws Exception{
+  var plant=new Evidence("plant:7","Ginkgo biloba","CATALOG","SOURCE_REPORTED","METADATA_ONLY",Map.of("scientificName","Ginkgo biloba","nameZh","银杏"),List.of(),"/api/v1/plants/7","plant:7");
+  when(tools.execute(eq("searchPlants"),anyMap())).thenReturn(new ToolOutput("SUCCESS","actual",1,List.of(plant)));when(tools.stillPublic(any())).thenReturn(true);create();
+  var previous=finished(service.start("owner","user:a","介绍银杏。").id());clearInvocations(tools);
+  var next=finished(service.start("owner","user:a","这些资料来自哪里？",Map.of(),previous.id(),"KNOWLEDGE").id());
+  verify(tools).execute("getPlantProfile",Map.of("plantId",7L));verify(tools).execute("getEvidenceLineage",Map.of("recordId","plant:7"));assertEquals(0,next.usage().modelCalls());
+  assertEquals(404,assertThrows(ResponseStatusException.class,()->service.start("intruder","user:b","追问",Map.of(),previous.id(),"KNOWLEDGE")).getStatusCode().value());
+ }
+ @Test void clearingConversationInvalidatesServerContext()throws Exception{
+  create();var previous=finished(service.start("owner","user:a","介绍银杏。").id());service.clear("owner");assertEquals(404,assertThrows(ResponseStatusException.class,()->service.get("owner",previous.id())).getStatusCode().value());
+ }
+ @Test void withdrawnPlantCannotBeInheritedByFollowup()throws Exception{
+  var plant=new Evidence("plant:7","Ginkgo biloba","CATALOG","SOURCE_REPORTED","METADATA_ONLY",Map.of("scientificName","Ginkgo biloba"),List.of(),null,"plant:7");
+  when(tools.execute(eq("searchPlants"),anyMap())).thenReturn(new ToolOutput("SUCCESS","actual",1,List.of(plant)));when(tools.stillPublic(any())).thenReturn(true);create();var previous=finished(service.start("owner","user:a","介绍银杏。").id());
+  when(tools.stillPublic(any())).thenReturn(false);when(tools.execute(eq("searchPlants"),anyMap())).thenReturn(new ToolOutput("INSUFFICIENT_EVIDENCE","empty",0,List.of()));clearInvocations(tools);finished(service.start("owner","user:a","它有哪些联系？",Map.of(),previous.id(),"KNOWLEDGE").id());verify(tools,never()).execute(eq("getPlantProfile"),anyMap());
+ }
+ @Test void noToolModelResponseFallsBackRatherThanInventingSuccessfulExploration()throws Exception{
+  when(model.configured()).thenReturn(true);when(model.complete(anyList(),anyList(),any())).thenReturn(new ModelTurn(Map.of("content","invented prose"),List.of(),List.of(),1L,1L));create();var result=finished(service.start("owner","user:a","复杂科研问题").id());
+  assertEquals("MODEL_NO_TOOL_EVIDENCE",result.errorCode());assertEquals(1,result.usage().modelCalls());verify(tools,atLeastOnce()).execute(eq("searchPlants"),anyMap());assertFalse(result.answer().summary().contains("invented"));
+ }
+
+ @Test void lineageEnrichmentCannotErasePlantCardIdentity()throws Exception{
+  var plant=new Evidence("plant:7","Ginkgo biloba","CATALOG","SOURCE_REPORTED","METADATA_ONLY",Map.of("scientificName","Ginkgo biloba","nameZh","银杏"),List.of(),"/api/v1/plants/7","plant:7");
+  var metadata=new Evidence("plant:7","Ginkgo biloba","METADATA","METADATA_ONLY","METADATA_ONLY",Map.of("nodeType","PLANT"),List.of(Map.of("sourceId","real-source")),"/api/v1/graph/nodes/plant:7","plant:7");
+  when(tools.execute(eq("searchPlants"),anyMap())).thenReturn(new ToolOutput("SUCCESS","actual",1,List.of(plant)));when(tools.execute(eq("getEvidenceLineage"),anyMap())).thenReturn(new ToolOutput("SUCCESS","actual",1,List.of(metadata)));when(tools.stillPublic(any())).thenReturn(true);create();
+  var result=finished(service.start("owner","user:a","介绍银杏。").id());var actual=result.answer().claims().getFirst();assertEquals("CATALOG",actual.category());assertEquals("Ginkgo biloba",actual.fields().get("scientificName"));assertEquals("real-source",actual.sources().getFirst().get("sourceId"));assertTrue(result.answer().summary().contains("银杏"));
+ }
+
 }

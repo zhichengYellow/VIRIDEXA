@@ -112,3 +112,7 @@ MySQL测试使用独立随机schema、独立身份和明确技术夹具，禁止
 [发布验收](docs/VIRIDEXA_V0.1.0_RELEASE.md) · [部署安全审计](docs/FINAL_PERFORMANCE_SECURITY_AUDIT.md) · [部署前清单](docs/PHASE7S_UBUNTU_CHECKLIST.md) · [变更记录](CHANGELOG.md)
 
 当前限制：中文名与图片覆盖不完整、科研样本身份仍有缺口、正式事实0、真实模型未联调、邮件验证/找回未启用、对象存储未实现、尚未完成公网部署验收。大型图谱展开存在秒级延迟；图表依赖保持路由懒加载。
+
+### 部署准备与最新 Agent 升级
+
+部署前先阅读 [服务器上线门禁](docs/SERVER_DEPLOYMENT_READINESS.md) 和 [Agent真实联调验收](docs/AGENT_FLAGSHIP_ACCEPTANCE.md)。搜索框已支持基于真实公开名称的输入联想。OpenRouter免费模型有服务端零价格校验、持久额度与Kill Switch，默认关闭；代码公开不包含真实Key和科研原始资料。当前本地Docker磁盘耗尽，最终生产回归仍受阻，不能将此提交等同于公网部署成功。

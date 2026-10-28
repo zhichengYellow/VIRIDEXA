@@ -18,12 +18,18 @@ public class OpenAiModelProvider implements ModelProvider {
     private final AgentProperties properties;
     private final ObjectMapper mapper;
     private final HttpClient client;
+    private final OpenRouterBudget budget;
+    private final boolean protocolFixture;
 
-    public OpenAiModelProvider(AgentProperties properties, ObjectMapper mapper) {
-        this.properties = properties; this.mapper = mapper;
+    @org.springframework.beans.factory.annotation.Autowired
+    public OpenAiModelProvider(AgentProperties properties, ObjectMapper mapper) {this(properties,mapper,false);}
+    OpenAiModelProvider(AgentProperties properties,ObjectMapper mapper,boolean protocolFixture) {
+        this.protocolFixture=protocolFixture;
+        this.properties = properties; this.mapper = mapper; this.budget = new OpenRouterBudget(properties);
         this.client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).followRedirects(HttpClient.Redirect.NEVER).build();
     }
-    @Override public boolean configured() { return properties.isEnabled() && nonblank(properties.getApiKey()) && nonblank(properties.getModel()); }
+    @Override public boolean configured() { return !budget.disabled() && properties.isEnabled() && nonblank(properties.getApiKey()) && nonblank(properties.getModel()); }
+    public Map<String,Object> freeStatus(){try{return budget.status();}catch(RuntimeException e){return Map.of("dailyLimit",30,"minuteLimit",5,"userDailyModelLimit",10,"usedToday",-1,"killSwitch",true,"storageUnavailable",true);}}
     @Override public String modelName() { return properties.getModel(); }
 
     @Override public AgentContract.ModelTurn complete(List<Map<String,Object>> messages, List<Map<String,Object>> tools, Duration timeout) throws Exception {
@@ -38,18 +44,37 @@ public class OpenAiModelProvider implements ModelProvider {
                 throw new ProviderException("MODEL_REQUEST_TOO_LARGE");
         } catch (ProviderException e) { throw e; }
         catch (Exception e) { throw new ProviderException("MODEL_INVALID_REQUEST"); }
+        long deadline=System.nanoTime()+timeout.toNanos();
         URI endpoint;
         try { endpoint = URI.create(properties.getBaseUrl().replaceAll("/+$", "") + "/chat/completions"); }
         catch (RuntimeException e) { throw new ProviderException("MODEL_INVALID_ENDPOINT"); }
+        // Loopback HTTP exists solely for deterministic protocol tests. Every remote endpoint is free-only OpenRouter.
+        boolean remote = !protocolFixture;
+        if(protocolFixture&&!("http".equals(endpoint.getScheme())&&Set.of("127.0.0.1","localhost","::1").contains(endpoint.getHost())))throw new ProviderException("MODEL_FIXTURE_ENDPOINT_REJECTED");
+        Set<String> safeModels=Set.of();
+        if(remote) {
+            if(!"https://openrouter.ai/api/v1".equals(properties.getBaseUrl()))throw new ProviderException("MODEL_ENDPOINT_NOT_ALLOWED");
+            if(budget.disabled())throw new ProviderException("MODEL_KILL_SWITCH");
+            HttpRequest metadata=HttpRequest.newBuilder(URI.create("https://openrouter.ai/api/v1/models")).timeout(Duration.ofSeconds(4)).GET().build();
+            CompletableFuture<HttpResponse<byte[]>> check=client.sendAsync(metadata,info->new BoundedBodySubscriber(4*1024*1024));
+            try {var result=check.get(Math.min(4000,timeout.toMillis()),TimeUnit.MILLISECONDS);if(result.statusCode()!=200)throw new ProviderException("MODEL_PRICING_UNAVAILABLE");safeModels=OpenRouterPolicy.freeToolModels(mapper.readTree(result.body()));}
+            catch(Exception e){check.cancel(true);if(e instanceof InterruptedException)Thread.currentThread().interrupt();throw new ProviderException("MODEL_PRICING_UNAVAILABLE");}
+            try{OpenRouterPolicy.validateModel(properties.getModel(),safeModels,properties.getFreeModelAllowlist());}catch(ProviderException e){budget.trip(e.getCode());throw e;}
+        }
         Map<String,Object> payload = new LinkedHashMap<>();
         payload.put("model", properties.getModel()); payload.put("messages", messages); payload.put("tools", tools);
         payload.put("tool_choice", "auto"); payload.put("parallel_tool_calls", false); payload.put("max_completion_tokens", properties.getMaxOutputTokens());
+        if(remote){payload.remove("parallel_tool_calls");payload.remove("max_completion_tokens");payload.put("max_tokens",properties.getMaxOutputTokens());payload.put("provider",OpenRouterPolicy.routing());payload.put("plugins",List.of());payload.put("stream",false);}
         byte[] requestBody;
         try { requestBody = mapper.writeValueAsBytes(payload); }
         catch (Exception e) { throw new ProviderException("MODEL_INVALID_REQUEST"); }
         if (requestBody.length > MAX_BODY) throw new ProviderException("MODEL_REQUEST_TOO_LARGE");
+        timeout=Duration.ofNanos(Math.max(1,deadline-System.nanoTime()));
+        if(Thread.currentThread().isInterrupted()||timeout.toMillis()<1)throw new ProviderException("MODEL_TIMEOUT");
         HttpRequest request = HttpRequest.newBuilder(endpoint).timeout(timeout).header("Authorization", "Bearer " + properties.getApiKey())
                 .header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofByteArray(requestBody)).build();
+        String reservation=remote?budget.reserve():null;
+        budget.attempted();
         CompletableFuture<HttpResponse<byte[]>> future=client.sendAsync(request, info->new BoundedBodySubscriber(MAX_BODY));
         HttpResponse<byte[]> response;
         try { response=future.get(timeout.toMillis(),TimeUnit.MILLISECONDS); }
@@ -64,9 +89,17 @@ public class OpenAiModelProvider implements ModelProvider {
         byte[] body=response.body();
         if(response.statusCode()==429) throw new ProviderException("MODEL_QUOTA_EXHAUSTED");
         if(response.statusCode()<200||response.statusCode()>=300) throw new ProviderException("MODEL_HTTP_"+response.statusCode());
-        try { return parse(mapper.readTree(body), tools); }
+        try {
+            JsonNode root=mapper.readTree(body);
+            if(remote) {
+                try {String actual=OpenRouterPolicy.validateResponse(root,safeModels);budget.result(reservation,actual,validUsage(root.path("usage").path("prompt_tokens"))?root.path("usage").path("prompt_tokens").longValue():null,validUsage(root.path("usage").path("completion_tokens"))?root.path("usage").path("completion_tokens").longValue():null,"0");}
+                catch(ProviderException e){budget.result(reservation,root.path("model").asString("").matches("[a-zA-Z0-9_./:-]{1,160}")?root.path("model").asString():"UNVERIFIED",null,null,root.path("usage").path("cost").isNumber()?root.path("usage").path("cost").asString():"UNKNOWN");budget.trip(e.getCode());throw e;}
+            }
+            var parsed=parse(root, tools);
+            return remote?new AgentContract.ModelTurn(parsed.assistantMessage(),parsed.calls(),parsed.selectedEvidenceIds(),parsed.inputTokens(),parsed.outputTokens(),root.path("model").asString(),"0"):parsed;
+        }
         catch (ProviderException e) { throw e; }
-        catch (Exception e) { throw new ProviderException("MODEL_INVALID_RESPONSE"); }
+        catch (Exception e) { if(remote)budget.trip("MODEL_INVALID_RESPONSE");throw new ProviderException("MODEL_INVALID_RESPONSE"); }
     }
 
     private AgentContract.ModelTurn parse(JsonNode root,List<Map<String,Object>> tools) throws Exception {

@@ -12,6 +12,13 @@ public class PlantService {
         this.mapper = mapper;
     }
 
+    public List<PlantMapper.Suggestion> suggestions(String query,int limit){
+        if(query==null||query.isBlank())return List.of();String q=query.trim();
+        if(q.length()>80||q.chars().anyMatch(Character::isISOControl)||limit<1||limit>8)throw new IllegalArgumentException("Invalid suggestion query");
+        String prefix=q.replace("!","!!").replace("%","!%").replace("_","!_")+"%";
+        return mapper.suggestions(q,prefix,limit);
+    }
+
     public PlantSearchResult search(String query, int limit) {
         String normalizedQuery = query == null || query.isBlank() ? null : query.trim();
         long total = mapper.countPlants(normalizedQuery);

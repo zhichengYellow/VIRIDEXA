@@ -15,12 +15,20 @@ python3 - "$TURNSTILE_HOSTNAMES" "$WEB_ORIGIN" <<'PY'
 import sys
 from urllib.parse import urlparse
 hosts = [item.strip() for item in sys.argv[1].split(',')]
-origin = urlparse(sys.argv[2]).hostname
+parsed=urlparse(sys.argv[2])
+if parsed.scheme != "https" or parsed.username or parsed.password or parsed.query or parsed.fragment or parsed.path not in ("", "/"):
+    raise SystemExit("FAIL: WEB_ORIGIN must be a credential-free HTTPS origin")
+origin = parsed.hostname
 if not hosts or any(not h or h != h.lower() or '/' in h or ':' in h for h in hosts):
     raise SystemExit('FAIL: TURNSTILE_HOSTNAMES must contain lowercase hostnames')
 if len(hosts) != len(set(hosts)) or origin not in hosts:
     raise SystemExit('FAIL: hostnames must be unique and include WEB_ORIGIN hostname')
 PY
+if [[ "${AGENT_MODEL_ENABLED:-false}" == true ]]; then
+  need OPENROUTER_API_KEY
+  model="${OPENROUTER_MODEL:-openrouter/free}"
+  [[ "$model" == openrouter/free || "$model" == *:free ]] || fail 'Only free OpenRouter models are permitted'
+fi
 compose_files=(-f compose.yaml -f compose.production.yaml)
 if [[ "${1:-}" == --tunnel ]]; then
   need CLOUDFLARE_TUNNEL_TOKEN

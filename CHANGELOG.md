@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased — deployment preparation, 2026-10-28
+
+- Upgrade the evidence-grounded Agent with free-only OpenRouter routing, persistent atomic quotas, Kill Switch, bounded follow-up context and illustrated exploration trails. Two real free responses report zero cost; one earlier404 was rejected and degraded.
+- Add public source-name autocomplete to the home, gallery and command search, with bounded prefix matching, cancellation, IME and keyboard navigation.
+- Add a read-only Docker disk readiness gate and strengthen production origin/free-model preflight; document blocked deployment acceptance while the local Docker filesystem is full.
+- Keep secrets, original research, runtime ledgers and raw reports outside Git. Do not move the existing v0.1.0 tag.
+
 ## 0.1.0 — 2026-10-28
 
 - Deliver the VIRIDEXA digital botanical museum, searchable public source catalogue, plant detail, graph, workbench, evidence, controlled Agent, public accounts and administrator review workflows.

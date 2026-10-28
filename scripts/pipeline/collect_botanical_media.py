@@ -38,6 +38,7 @@ def fetch(url: str, limit: int = MAX_BYTES) -> bytes:
 
 def collect(name: str, plant_id: int, limit: int = 10) -> int:
     if not bare_binomial(name): raise ValueError(f"not an exact bare binomial: {name}")
+    if not isinstance(plant_id,int) or isinstance(plant_id,bool) or plant_id<1: raise ValueError("plant_id must be positive")
     if not 1 <= limit <= 30: raise ValueError("limit must be between 1 and 30")
     RAW.mkdir(parents=True, exist_ok=True); PUBLIC.mkdir(parents=True, exist_ok=True)
     q = f"{API}?taxon_name={name.replace(' ', '%20')}&quality_grade=research&photo_license=cc0,cc-by&per_page={limit}&order_by=votes"

@@ -20,6 +20,10 @@ public class ScientificService {
                 text(row,"id"), text(row,"pipeline"), PublicScientificData.payload(row.get("payload")), text(row,"source_id"),
                 row.get("locator"), row.get("decision_id"),text(row,"knowledge_confidence"))).toList();
     }
+    public List<Fact> leafSourceRecords(String term,int limit){
+        if(!Set.of("flabellate","fan-shaped").contains(term))throw new IllegalArgumentException("Unsupported literal leaf term");
+        return PublicScientificData.rows(mapper.leafSourceRecords(term,Math.min(bounded(limit),10))).stream().map(row->new Fact(text(row,"id"),text(row,"pipeline"),PublicScientificData.payload(row.get("payload")),text(row,"source_id"),row.get("locator"),row.get("decision_id"),text(row,"knowledge_confidence"))).toList();
+    }
     public List<Coverage> coverage() {
         return mapper.coverage().stream().map(row -> new Coverage(text(row,"pipeline"), number(row,"fact_count"), number(row,"source_count"))).toList();
     }

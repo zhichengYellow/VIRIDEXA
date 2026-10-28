@@ -11,6 +11,19 @@ import org.apache.ibatis.annotations.Select;
 
 @Mapper
 public interface PlantMapper {
+    record Suggestion(long id,String label,String scientificName,String matchedName,String matchType) {}
+    @Select("""
+      SELECT p.id,COALESCE((SELECT cn.name_text FROM plant_name cn WHERE cn.plant_id=p.id AND cn.language_tag LIKE 'zh%' AND cn.name_role='COMMON' AND cn.review_state IN ('APPROVED','SOURCE_REPORTED') ORDER BY cn.id LIMIT 1),t.canonical_name,n.name_text) AS label,
+       t.canonical_name AS scientificName,n.name_text AS matchedName,
+       CASE WHEN n.name_role='SCIENTIFIC' THEN 'SCIENTIFIC_NAME' WHEN n.language_tag LIKE 'zh%' THEN 'CHINESE_NAME_OR_ALIAS' ELSE 'SOURCE_NAME' END AS matchType
+      FROM graph_catalog p JOIN plant_name n ON n.plant_id=p.id LEFT JOIN taxon t ON t.id=p.taxon_id
+      WHERE p.is_public=1 AND (n.review_state IN ('APPROVED','SOURCE_REPORTED') OR (p.review_state='REVIEW_PENDING' AND n.review_state='VERIFIED_FROM_PRINTED_HEADING'))
+       AND n.name_text LIKE #{prefix} ESCAPE '!'
+      GROUP BY p.id,label,t.canonical_name,n.name_text,n.name_role,n.language_tag
+      ORDER BY (n.name_text=#{term}) DESC,n.name_text,p.id LIMIT #{limit}
+      """)
+    List<Suggestion> suggestions(@Param("term") String term,@Param("prefix") String prefix,@Param("limit") int limit);
+
     String FROM_PLANTS = """
             FROM graph_catalog p
             LEFT JOIN taxon species ON species.id = p.taxon_id

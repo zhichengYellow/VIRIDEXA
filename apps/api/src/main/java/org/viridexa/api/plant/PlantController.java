@@ -30,6 +30,11 @@ public class PlantController {
         return afterId==0?service.search(query, limit):service.searchAfter(query,limit,afterId);
     }
 
+    @GetMapping("/suggestions")
+    public java.util.List<PlantMapper.Suggestion> suggestions(@RequestParam @Size(max=80) String query,@RequestParam(defaultValue="6") @Min(1) @Max(8) int limit){
+        try{return service.suggestions(query,limit);}catch(IllegalArgumentException e){throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST,"联想参数无效");}
+    }
+
     @GetMapping("/{id}")
     public PlantRecord findById(@PathVariable @Positive long id) {
         return service.getById(id);

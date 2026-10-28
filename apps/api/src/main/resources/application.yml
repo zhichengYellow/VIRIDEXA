@@ -66,9 +66,10 @@ viridexa:
     timeout-seconds: ${TURNSTILE_TIMEOUT_SECONDS:4}
   agent:
     enabled: ${AGENT_MODEL_ENABLED:false}
-    api-key: ${AGENT_API_KEY:}
-    base-url: ${AGENT_BASE_URL:https://api.openai.com/v1}
-    model: ${AGENT_MODEL:}
+    api-key: ${OPENROUTER_API_KEY:}
+    base-url: https://openrouter.ai/api/v1
+    model: ${OPENROUTER_MODEL:openrouter/free}
+    free-model-allowlist: ${OPENROUTER_FREE_MODEL_ALLOWLIST:openrouter/free}
     runtime-directory: ${AGENT_RUNTIME_DIRECTORY:.runtime/agent}
     max-model-calls: ${AGENT_MAX_MODEL_CALLS:3}
     max-tool-calls: ${AGENT_MAX_TOOL_CALLS:6}

@@ -22,7 +22,7 @@ class OpenAiModelProviderTest {
             exchange.getResponseHeaders().add("Content-Type","application/json"); exchange.sendResponseHeaders(200,body.length); exchange.getResponseBody().write(body); exchange.close();
         }); server.start();
         try {
-            AgentProperties p=props(server); OpenAiModelProvider provider=new OpenAiModelProvider(p,mapper);
+            AgentProperties p=props(server); OpenAiModelProvider provider=new OpenAiModelProvider(p,mapper,true);
             var turn=provider.complete(List.of(Map.of("role","user","content","hello")),List.of(Map.of("type","function","function",Map.of("name","search"))),Duration.ofSeconds(2));
             assertEquals("Bearer secret",seen.get(0)); assertTrue(seen.get(1).contains("\"parallel_tool_calls\":false"));
             assertEquals("search",turn.calls().get(0).name()); assertEquals("x",turn.calls().get(0).arguments().get("q"));
@@ -44,6 +44,7 @@ class OpenAiModelProviderTest {
     }
     @Test void mapsQuotaAndOversizedResponsesToSafeErrors() throws Exception {
         assertCode(429,"secret provider details","MODEL_QUOTA_EXHAUSTED");
+        assertCode(402,"credit details must remain private","MODEL_HTTP_402");
         String tooLarge="x".repeat(128*1024+1);
         assertCode(200,tooLarge,"MODEL_RESPONSE_TOO_LARGE");
     }
@@ -64,7 +65,7 @@ class OpenAiModelProviderTest {
         java.util.concurrent.atomic.AtomicInteger requests=new java.util.concurrent.atomic.AtomicInteger();
         server.createContext("/v1/chat/completions",e->{int n=requests.incrementAndGet();try{if(n==1){e.sendResponseHeaders(200,2);Thread.sleep(350);e.getResponseBody().write("{}".getBytes());}else{byte[] b="{\"choices\":[{\"message\":{\"content\":\"{\\\"selectedEvidenceIds\\\":[]}\"}}]}".getBytes();e.sendResponseHeaders(200,b.length);e.getResponseBody().write(b);}}catch(Exception ignored){}e.close();});server.start();
         try {
-            OpenAiModelProvider provider=new OpenAiModelProvider(props(server),mapper);
+            OpenAiModelProvider provider=new OpenAiModelProvider(props(server),mapper,true);
             var ex=assertThrows(OpenAiModelProvider.ProviderException.class,()->provider.complete(List.of(Map.of("role","user","content","q")),tools(),Duration.ofMillis(50)));
             assertEquals("MODEL_TIMEOUT",ex.getCode());
             assertDoesNotThrow(()->provider.complete(List.of(Map.of("role","user","content","q")),tools(),Duration.ofSeconds(1)));
@@ -74,19 +75,23 @@ class OpenAiModelProviderTest {
         HttpServer server=HttpServer.create(new InetSocketAddress("127.0.0.1",0),0); server.start();
         try {
             AgentProperties p=props(server);p.setMaxInputChars(10);
-            var ex=assertThrows(OpenAiModelProvider.ProviderException.class,()->new OpenAiModelProvider(p,mapper).complete(List.of(Map.of("role","user","content","x".repeat(20))),tools(),Duration.ofSeconds(1)));
+            var ex=assertThrows(OpenAiModelProvider.ProviderException.class,()->new OpenAiModelProvider(p,mapper,true).complete(List.of(Map.of("role","user","content","x".repeat(20))),tools(),Duration.ofSeconds(1)));
             assertEquals("MODEL_REQUEST_TOO_LARGE",ex.getCode());
         } finally {server.stop(0);}
+    }
+    @Test void correlatesMultipleValidCallsWithDistinctIds()throws Exception{
+        var turn=invoke(200,"{\"choices\":[{\"message\":{\"tool_calls\":[{\"id\":\"one\",\"function\":{\"name\":\"search\",\"arguments\":\"{}\"}},{\"id\":\"two\",\"function\":{\"name\":\"search\",\"arguments\":\"{\\\"q\\\":\\\"银杏\\\"}\"}}]}}]}");
+        assertEquals(List.of("one","two"),turn.calls().stream().map(AgentContract.ToolCall::id).toList());assertEquals("银杏",turn.calls().get(1).arguments().get("q"));
     }
     private void assertCode(int status,String body,String expected) throws Exception {
         HttpServer server=HttpServer.create(new InetSocketAddress("127.0.0.1",0),0);
         server.createContext("/v1/chat/completions",e->{byte[] b=body.getBytes(StandardCharsets.UTF_8);try{e.sendResponseHeaders(status,b.length);e.getResponseBody().write(b);}catch(Exception ignored){}e.close();});server.start();
-        try {var ex=assertThrows(OpenAiModelProvider.ProviderException.class,()->new OpenAiModelProvider(props(server),mapper).complete(List.of(Map.of("role","user","content","q")),tools(),Duration.ofSeconds(1)));assertEquals(expected,ex.getCode());assertFalse(ex.getMessage().contains("secret"));} finally {server.stop(0);}
+        try {var ex=assertThrows(OpenAiModelProvider.ProviderException.class,()->new OpenAiModelProvider(props(server),mapper,true).complete(List.of(Map.of("role","user","content","q")),tools(),Duration.ofSeconds(1)));assertEquals(expected,ex.getCode());assertFalse(ex.getMessage().contains("secret"));} finally {server.stop(0);}
     }
     private AgentContract.ModelTurn invoke(int status,String body) throws Exception {
         HttpServer server=HttpServer.create(new InetSocketAddress("127.0.0.1",0),0);
         server.createContext("/v1/chat/completions",e->{byte[] b=body.getBytes(StandardCharsets.UTF_8);try{e.sendResponseHeaders(status,b.length);e.getResponseBody().write(b);}catch(Exception ignored){}e.close();});server.start();
-        try{return new OpenAiModelProvider(props(server),mapper).complete(List.of(Map.of("role","user","content","q")),tools(),Duration.ofSeconds(1));}finally{server.stop(0);}
+        try{return new OpenAiModelProvider(props(server),mapper,true).complete(List.of(Map.of("role","user","content","q")),tools(),Duration.ofSeconds(1));}finally{server.stop(0);}
     }
     private List<Map<String,Object>> tools(){return List.of(Map.of("type","function","function",Map.of("name","search")));}
     private AgentProperties props(HttpServer server) {

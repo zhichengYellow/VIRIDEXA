@@ -39,7 +39,7 @@ onMounted(()=>{
  void securityMeta().then(data=>{security.value=data}).catch(()=>{})
 })
 const sourceFamilies=computed(()=>[...new Set((showcase.value?.sources??[]).map(s=>sourceInfo(s.dataset).name.split(' · ')[0]))])
-const modules=[{to:'/explore',icon:'leaf',eyebrow:'01 / CATALOG',title:'植物探索',description:'检索公开目录、详情与来源定位。'},{to:'/knowledge-graph',icon:'network',eyebrow:'02 / CYTOSCAPE.JS',title:'知识网络',description:'搜索并展开植物、来源和证据关系。'},{to:'/workbench',icon:'chart',eyebrow:'03 / ECHARTS',title:'科研实验台',description:'查看公开样本与可比性边界；操作需登录。'},{to:'/assistant',icon:'spark',eyebrow:'04 / ASSISTANT',title:'研究助手',description:'受限只读工具；真实模型尚未配置。'},{to:'/review',icon:'shield',eyebrow:'05 / GOVERNANCE',title:'审核工作区',description:'管理员登录后审核候选和来源许可。'}]
+const modules=[{to:'/explore',icon:'leaf',eyebrow:'01 / CATALOG',title:'植物探索',description:'检索公开目录、详情与来源定位。'},{to:'/knowledge-graph',icon:'network',eyebrow:'02 / CYTOSCAPE.JS',title:'知识网络',description:'搜索并展开植物、来源和证据关系。'},{to:'/workbench',icon:'chart',eyebrow:'03 / ECHARTS',title:'科研实验台',description:'查看公开样本与可比性边界；操作需登录。'},{to:'/assistant',icon:'spark',eyebrow:'04 / ASSISTANT',title:'研究助手',description:'免费模型白名单、受控只读工具与证据引用。'},{to:'/review',icon:'shield',eyebrow:'05 / GOVERNANCE',title:'审核工作区',description:'管理员登录后审核候选和来源许可。'}]
 </script>
 <template>
   <main class="technology-page">
@@ -97,6 +97,7 @@ const modules=[{to:'/explore',icon:'leaf',eyebrow:'01 / CATALOG',title:'植物�
     </section></details>
     <p v-else class="technology-empty-state"><UiIcon name="book" :size="18" />来源清单暂不可用。范围计划包括 WFO、NHM、GBIF、Flora of China、USDA、课程资料和科研论文；名称列示不代表来源已下载、许可已核验或内容已入库。</p>
 
+    <section class="technology-pipelines" aria-label="Agent 旗舰工程能力"><article class="technology-pipeline-card"><p class="technology-section-kicker">EXPLORATION TRAIL</p><h3>从好奇，走到证据</h3><p>三种探索体验共用六个只读领域工具。图文卡片来自真实实体，探索轨迹只展示实际执行事件。</p><RouterLink :to="{path:'/assistant',query:{question:'介绍银杏。'}}">试试认识银杏 ↗</RouterLink></article><article class="technology-pipeline-card"><p class="technology-section-kicker">FREE-ONLY OPENROUTER</p><h3>免费策略失效，就停止</h3><p>每次远程请求前实时校验价格；零价格上限、禁付费回退、持久化原子配额，每站每日30次 / 每分钟5次。异常费用触发 Kill Switch。</p><p>{{agent?.modelConfigured?'运行配置：远程模型已配置；真实联调结果请查验收报告。':'运行配置：领域检索模式，未启用远程模型。'}}</p></article><article class="technology-pipeline-card"><p class="technology-section-kicker">GROUNDED BY DESIGN</p><h3>把回答还给真实记录</h3><p>引用 ID 必须存在于本轮公开工具结果；多轮只保留有界上下文，重新检查权限。样本比较复用实验台规则，不猜测物种或缺失单位。</p><RouterLink :to="{path:'/assistant',query:{question:'帮我查看麻疯树的含油率研究记录，并比较可以直接比较的样本。'}}">查看科研问题的证据边界 ↗</RouterLink></article></section>
     <div class="technology-section-heading"><div><p class="technology-section-kicker">04 / EXPLORE THE PLATFORM</p><h2>直接进入实际功能模块</h2></div><p>目录、网络、工作台、助手和审核均连接各自的真实路由与服务。</p></div>
     <section class="technology-module-grid"><RouterLink v-for="m in modules" :key="m.to" class="technology-module-card" :to="m.to"><span class="technology-module-eyebrow">{{ m.eyebrow }}</span><span class="technology-module-icon"><UiIcon :name="m.icon" :size="21" /></span><h3>{{ m.title }}</h3><p>{{ m.description }}</p><span class="technology-module-link">打开模块 <UiIcon name="arrow" :size="14" /></span></RouterLink></section>
 

@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-28",
+  "spring": {
+    "tests": 177,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "frontend": {
+    "tests": 50,
+    "failures": 0
+  },
+  "pipeline": {
+    "tests": 18,
+    "failures": 0
+  },
+  "productionConfigFixtures": {
+    "tests": 4,
+    "failures": 0
+  },
+  "deploymentReady": false,
+  "blocker": "Docker filesystem 100% full; final MySQL/production API/Compose runtime regression blocked",
+  "secretScan": "staged file export passed; real data, credentials, ledgers and raw reports excluded"
+}

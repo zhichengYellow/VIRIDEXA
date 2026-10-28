@@ -46,6 +46,8 @@ services:
       start_period: 25s
 
   api:
+    tmpfs:
+      - /tmp:rw,nosuid,size=64m,mode=1777
     build:
       context: ./apps/api
       dockerfile: Dockerfile
@@ -62,9 +64,9 @@ services:
       TRUSTED_PROXY_CIDRS: ${TRUSTED_PROXY_CIDRS:-}
       API_DOCS_ENABLED: ${API_DOCS_ENABLED:-true}
       AGENT_MODEL_ENABLED: ${AGENT_MODEL_ENABLED:-false}
-      AGENT_API_KEY: ${AGENT_API_KEY:-}
-      AGENT_BASE_URL: ${AGENT_BASE_URL:-https://api.openai.com/v1}
-      AGENT_MODEL: ${AGENT_MODEL:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-openrouter/free}
+      OPENROUTER_FREE_MODEL_ALLOWLIST: ${OPENROUTER_FREE_MODEL_ALLOWLIST:-openrouter/free}
       AGENT_RUNTIME_DIRECTORY: /agent-runtime
       AGENT_USER_DAILY_REQUESTS: ${AGENT_USER_DAILY_REQUESTS:-20}
       AGENT_GLOBAL_DAILY_REQUESTS: ${AGENT_GLOBAL_DAILY_REQUESTS:-200}
