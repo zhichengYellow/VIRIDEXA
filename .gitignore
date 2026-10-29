@@ -34,3 +34,8 @@ __pycache__/
 *.jks
 *.sql.gz
 *.dump
+
+# Local Cloudflare emulator/cache and secret files
+**/.wrangler/
+**/.dev.vars
+**/.dev.vars.*

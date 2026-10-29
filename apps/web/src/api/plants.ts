@@ -13,5 +13,8 @@ export async function searchPlants(query: string, limit = 3, signal?: AbortSigna
   if (!response.ok) {
     throw Object.assign(new Error(response.status===429?friendlyRateLimit(response.headers.get('Retry-After')||undefined):`植物资料暂时无法读取（${response.status}）。`),{status:response.status})
   }
+  if (response.headers.get('content-type')?.includes('text/html')) {
+    throw new Error('植物查询后端尚未连接；当前静态站点无法查询真实数据库。')
+  }
   return response.json() as Promise<PlantSearchResult>
 }

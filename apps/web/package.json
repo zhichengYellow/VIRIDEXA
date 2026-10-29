@@ -11,7 +11,11 @@
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview --host 0.0.0.0",
     "typecheck": "vue-tsc -b --pretty",
-    "test": "node --experimental-strip-types --test src/graph/__tests__/*.test.ts src/assistant/__tests__/*.test.ts src/workbench/__tests__/*.test.ts src/onboarding/__tests__/*.test.ts src/account/__tests__/*.test.ts src/security/__tests__/*.test.ts src/ui/__tests__/*.test.ts"
+    "test": "node --experimental-strip-types --test src/graph/__tests__/*.test.ts src/assistant/__tests__/*.test.ts src/workbench/__tests__/*.test.ts src/onboarding/__tests__/*.test.ts src/account/__tests__/*.test.ts src/security/__tests__/*.test.ts src/ui/__tests__/*.test.ts",
+    "postbuild": "node scripts/check-static-assets.mjs",
+    "deploy:check": "wrangler deploy --dry-run",
+    "deploy:cloudflare": "wrangler deploy",
+    "preview:cloudflare": "wrangler dev --ip 127.0.0.1"
   },
   "dependencies": {
     "cytoscape": "3.34.4",
@@ -27,6 +31,7 @@
     "tailwindcss": "4.3.3",
     "typescript": "^5.9.3",
     "vite": "8.3.5",
-    "vue-tsc": "3.3.13"
+    "vue-tsc": "3.3.13",
+    "wrangler": "4.154.0"
   }
 }

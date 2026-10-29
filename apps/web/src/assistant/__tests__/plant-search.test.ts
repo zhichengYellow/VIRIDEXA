@@ -10,3 +10,5 @@ test('failed plant search cannot return an apparent empty successful result',asy
  const original=globalThis.fetch;globalThis.fetch=async()=>new Response('',{status:503})
  try{await assert.rejects(searchPlants(''),/503/)}finally{globalThis.fetch=original}
 })
+
+test('HTML from a static SPA fallback is reported as unavailable backend, not an empty database',async()=>{const original=globalThis.fetch;try{globalThis.fetch=async()=>new Response('<!doctype html>',{headers:{'Content-Type':'text/html'}});await assert.rejects(()=>searchPlants('银杏'),/后端尚未连接/)}finally{globalThis.fetch=original}})
