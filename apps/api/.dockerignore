@@ -1,3 +1,10 @@
+# Allow only reviewed source inputs. Existing Compose consumes the host-built JAR.
 *
+!pom.xml
+!src/
+!src/**
+!deploy/
+!deploy/render-start.sh
 !target/
+!target/viridexa-api-0.1.0.jar
 !target/viridexa-api-0.1.0-SNAPSHOT.jar

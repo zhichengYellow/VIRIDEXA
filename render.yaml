@@ -1,0 +1,43 @@
+# Optional Render Blueprint. No database, disk or paid plan is created here.
+services:
+  - type: web
+    name: viridexa-api
+    runtime: docker
+    plan: free
+    # Asia deployment for the ap-northeast-1 TiDB endpoint; no measured latency claim.
+    region: singapore
+    dockerfilePath: ./apps/api/Dockerfile.render
+    dockerContext: ./apps/api
+    healthCheckPath: /actuator/health
+    autoDeployTrigger: "off"
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: render,tidb
+      - key: AGENT_MODEL_ENABLED
+        value: "false"
+      - key: WEB_ORIGIN
+        sync: false
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_ACCOUNT_USERNAME
+        sync: false
+      - key: DB_ACCOUNT_PASSWORD
+        sync: false
+      - key: DB_REVIEW_USERNAME
+        sync: false
+      - key: DB_REVIEW_PASSWORD
+        sync: false
+      - key: TURNSTILE_ENABLED
+        value: "true"
+      - key: TURNSTILE_MODE
+        value: production
+      - key: TURNSTILE_SITE_KEY
+        sync: false
+      - key: TURNSTILE_SECRET
+        sync: false
+      - key: TURNSTILE_HOSTNAMES
+        sync: false

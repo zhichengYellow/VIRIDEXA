@@ -1,0 +1,14 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "viridexa",
+  "main": "./worker/render-proxy.mjs",
+  "compatibility_date": "2026-10-29",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  }
+  // Set API_ORIGIN to the exact HTTPS Render service origin in Worker settings.
+  // Missing/invalid origin yields a real 503 JSON error; it never fabricates data.
+}

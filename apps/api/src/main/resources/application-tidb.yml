@@ -1,0 +1,25 @@
+# Combine with render: SPRING_PROFILES_ACTIVE=render,tidb
+spring:
+  datasource:
+    hikari:
+      # TiDB rejects JDBC SET TRANSACTION READ ONLY. SELECT-only grants enforce safety.
+      read-only: false
+      # Bound per-query worker buffers on the free shared database. Session-only.
+      connection-init-sql: "SET SESSION tidb_executor_concurrency=2, tidb_distsql_scan_concurrency=2"
+      data-source-properties:
+        readOnlyPropagatesToServer: false
+  jdbc:
+    template:
+      query-timeout: 10s
+  flyway:
+    # The TiDB baseline is generated separately; never replay MySQL V1-V25 here.
+    enabled: false
+viridexa:
+  workbench:
+    transaction-timeout-seconds: 20
+  accounts:
+    registration-mode: portable
+
+mybatis:
+  configuration:
+    default-statement-timeout: 10

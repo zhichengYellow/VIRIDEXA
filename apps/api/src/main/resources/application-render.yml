@@ -1,0 +1,42 @@
+# Optional low-memory deployment; existing Compose defaults remain unchanged.
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 3
+      minimum-idle: 0
+      idle-timeout: 60000
+      max-lifetime: 600000
+  flyway:
+    # Migrate once with a separately authorized identity before deploying.
+    enabled: false
+server:
+  address: 0.0.0.0
+  port: ${PORT:10000}
+  tomcat:
+    max-connections: 60
+    accept-count: 16
+    threads:
+      max: 16
+      min-spare: 2
+  servlet:
+    session:
+      cookie:
+        secure: true
+viridexa:
+  agent:
+    # The Free filesystem is ephemeral. Never reset remote spending limits on wake.
+    enabled: false
+    api-key: ''
+    runtime-directory: /tmp/viridexa-agent
+    max-concurrent: 1
+    max-output-tokens: 600
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

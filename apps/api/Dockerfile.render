@@ -1,0 +1,18 @@
+# Render builds from apps/api; never send the repository data/ directory.
+FROM maven:3.9.9-eclipse-temurin-21 AS build
+WORKDIR /build
+COPY pom.xml ./
+RUN --mount=type=cache,target=/root/.m2 mvn -B -ntp dependency:go-offline
+COPY src ./src
+# Run tests when producing the deployable artifact; no source data is required.
+RUN --mount=type=cache,target=/root/.m2 mvn -B -ntp verify
+
+FROM eclipse-temurin:21-jre-jammy AS runtime
+WORKDIR /app
+RUN groupadd --gid 10001 viridexa && useradd --uid 10001 --gid viridexa --no-create-home viridexa
+COPY --from=build --chown=10001:10001 /build/target/viridexa-api-0.1.0.jar /app/app.jar
+COPY --chmod=0555 deploy/render-start.sh /app/render-start.sh
+USER 10001:10001
+ENV SPRING_PROFILES_ACTIVE=render
+EXPOSE 10000
+ENTRYPOINT ["/app/render-start.sh"]

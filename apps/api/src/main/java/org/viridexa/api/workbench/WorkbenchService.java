@@ -15,7 +15,7 @@ import org.viridexa.api.graph.*;
 import org.viridexa.api.graph.GraphContract.SourceReference;
 import static org.viridexa.api.workbench.WorkbenchContract.*;
 
-@Service @Transactional(readOnly=true,timeout=10)
+@Service @Transactional(readOnly=true,timeoutString="${viridexa.workbench.transaction-timeout-seconds:10}")
 public class WorkbenchService {
  public static final String PUBLIC_NOTICE="仅展示获准公开的目录、来源与来源测量记录；公开展示不表示已经人工核验；缺失值不等于0，未关联样本不代表已识别物种。";
  public static final String CANDIDATE_NOTICE="未经人工核验，仅供候选数据审查，不构成正式科学结论。";

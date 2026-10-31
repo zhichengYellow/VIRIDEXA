@@ -1,0 +1,7 @@
+# Overrides .dockerignore only for Dockerfile.render: build entirely from source.
+*
+!pom.xml
+!src/
+!src/**
+!deploy/
+!deploy/render-start.sh
